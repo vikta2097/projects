@@ -1,0 +1,210 @@
+/* Employees.css (matching dashboard-home and sidebar) */
+
+.employees-container {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  margin-left: 250px; /* leave space for sidebar */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937; /* matching dashboard text */
+}
+
+.employees-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.employees-container p {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+/* Employee Form Card - similar to .stat-card style */
+.employee-form {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.employee-form:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.employee-form h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2563eb; /* same blue as stat-card h2 */
+  margin-bottom: 1rem;
+}
+
+/* Form groups */
+.form-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: #1f2937;
+}
+
+.employee-form input,
+.employee-form select {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 1.5px solid #d1d5db; /* light gray border */
+  border-radius: 8px;
+  transition: border-color 0.2s ease-in-out;
+  color: #1f2937;
+}
+
+.employee-form input:focus,
+.employee-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+}
+
+/* Buttons */
+.employee-form button {
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-right: 12px;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.employee-form button[type="submit"] {
+  background-color: #2563eb;
+  color: white;
+}
+
+.employee-form button[type="submit"]:hover:not(:disabled) {
+  background-color: #1e40af;
+}
+
+.employee-form button[type="button"] {
+  background-color: #6b7280; /* gray-500 */
+  color: white;
+}
+
+.employee-form button[type="button"]:hover:not(:disabled) {
+  background-color: #4b5563; /* gray-700 */
+}
+
+.employee-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Employee Table */
+.employee-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px; /* space between rows */
+  background-color: transparent;
+}
+
+.employee-table thead tr {
+  background-color: #2563eb;
+  color: white;
+  border-radius: 12px;
+}
+
+.employee-table thead th {
+  padding: 12px 20px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.employee-table tbody tr {
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.employee-table tbody tr:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.employee-table tbody td {
+  padding: 14px 20px;
+  color: #1f2937;
+  font-size: 0.95rem;
+  border: none;
+}
+
+/* Action buttons inside table */
+.employee-table button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 6px 10px;
+  margin-right: 6px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.employee-table button[title="Edit employee"] {
+  color: #2563eb;
+}
+
+.employee-table button[title="Edit employee"]:hover:not(:disabled) {
+  background-color: #d0e5ff;
+}
+
+.employee-table button[title="Delete employee"] {
+  color: #dc2626;
+}
+
+.employee-table button[title="Delete employee"]:hover:not(:disabled) {
+  background-color: #fee2e2;
+}
+
+.employee-table button[title="Deactivate employee"] {
+  color: #f59e0b;
+}
+
+.employee-table button[title="Deactivate employee"]:hover:not(:disabled) {
+  background-color: #fef3c7;
+}
+
+.employee-table button[title="Activate employee"] {
+  color: #16a34a;
+}
+
+.employee-table button[title="Activate employee"]:hover:not(:disabled) {
+  background-color: #dcfce7;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .employees-container {
+    padding: 1rem;
+    margin-left: 0;
+  }
+
+  .employee-form,
+  .employee-table {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}

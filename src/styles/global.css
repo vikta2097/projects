@@ -1,0 +1,48 @@
+/* global.css */
+* {
+  cursor: auto !important;
+}
+
+button,
+input,
+.submit-btn,
+.link-btn {
+  cursor: pointer !important;
+}
+
+/* Aligns content to the right of fixed sidebar */
+.main-content {
+  margin-left: 250px; /* matches .sidebar width */
+  padding: 30px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Optional: Style for logout confirmation box */
+.logout-confirm {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+  margin: 100px auto;
+}
+
+.btn {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}

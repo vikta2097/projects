@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Test Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <h1>Registration Test Form</h1>
+  
+  <div class="form-group">
+    <label for="fullname">Full Name:</label>
+    <input type="text" id="fullname" name="fullname" required>
+  </div>
+
+  <div class="form-group">
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+  </div>
+
+  <button id="register-btn">Register</button>
+
+  <div id="result" class="result" style="display: none;"></div>
+
+  <script>
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const fullname = document.getElementById('fullname').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const resultDiv = document.getElementById('result');
+      
+      // Basic validation
+      if (!fullname || !email || !password) {
+        resultDiv.className = 'result error';
+        resultDiv.textContent = 'All fields are required';
+        resultDiv.style.display = 'block';
+        return;
+      }
+      
+      // Prepare data
+      const userData = {
+        fullname,
+        email,
+        password
+      };
+      
+      try {
+        // Show loading state
+        resultDiv.className = 'result';
+        resultDiv.textContent = 'Sending request...';
+        resultDiv.style.display = 'block';
+        
+        // Send request to API
+        const response = await fetch('http://localhost:5000/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        });
+        
+        // Parse response
+        const data = await response.json();
+        
+        // Show result
+        if (response.ok) {
+          resultDiv.className = 'result success';
+          resultDiv.innerHTML = `
+            <h3>Registration Successful!</h3>
+            <p>${data.message}</p>
+            <p>User ID: ${data.userId}</p>
+          `;
+        } else {
+          resultDiv.className = 'result error';
+          resultDiv.innerHTML = `
+            <h3>Registration Failed!</h3>
+            <p>${data.message || 'Unknown error'}</p>
+            ${data.error ? `<p>Error: ${data.error}</p>` : ''}
+          `;
+        }
+      } catch (error) {
+        // Network or other errors
+        resultDiv.className = 'result error';
+        resultDiv.innerHTML = `
+          <h3>Request Failed!</h3>
+          <p>${error.message}</p>
+          <p>Check that your server is running at http://localhost:5000</p>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
