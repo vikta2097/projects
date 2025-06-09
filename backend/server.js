@@ -6,7 +6,7 @@ const verifyToken = require('./auth'); // assuming you have this file
 const userRoutes = require('./Users');
 
 const app = express();
-const PORT = process.env.PORT || 5100;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
