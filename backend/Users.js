@@ -12,63 +12,132 @@ router.get('/validate-token', verifyToken, (req, res) => {
   res.json({ valid: true });
 });
 
-// -------------------- AUTHENTICATION --------------------
 
-// Register
+
+// Helper: validate email format (simple regex)
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+
+// -------------------- AUTHENTICATION --------------------
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, fullname } = req.body;
+
+  // Basic validation
+  if (!email || !password || !fullname) {
+    return res.status(400).json({ message: 'Email, password, and fullname are required' });
+  }
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters' });
+  }
+
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.query('INSERT INTO usercredentials (email, password) VALUES (?, ?)', [email, hashedPassword], (err) => {
-      if (err) return res.status(500).json({ message: 'Registration failed' });
-      res.json({ message: 'User registered successfully' });
+    // Check if email already exists
+    db.query('SELECT id FROM usercredentials WHERE email = ?', [email], async (err, results) => {
+      if (err) {
+        console.error('DB error during email check:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+
+      if (results.length > 0) {
+        return res.status(409).json({ message: 'Email already registered' });
+      }
+
+      // Insert user
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const sql = 'INSERT INTO usercredentials (email, password, fullname) VALUES (?, ?, ?)';
+      const values = [email, hashedPassword, fullname];
+
+      db.query(sql, values, (err) => {
+        if (err) {
+          console.error('DB error during registration:', err);
+          return res.status(500).json({ message: 'Registration failed' });
+        }
+        res.json({ message: 'User registered successfully' });
+      });
     });
-  } catch {
+  } catch (err) {
+    console.error('Unexpected registration error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // Login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) return res.status(400).json({ message: 'Email and password are required' });
+
   db.query('SELECT * FROM usercredentials WHERE email = ?', [email], async (err, results) => {
-    if (err || results.length === 0) return res.status(401).json({ message: 'Invalid email or password' });
+    if (err) {
+      console.error('DB error during login:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
     const user = results[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
+    try {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.json({ token });
+    } catch (error) {
+      console.error('Error comparing password:', error);
+      res.status(500).json({ message: 'Login error' });
+    }
   });
 });
 
 // Forgot password
 router.post('/forgot-password', (req, res) => {
   const { email } = req.body;
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: { rejectUnauthorized: false },
-  });
+  if (!email) return res.status(400).json({ message: 'Email is required' });
 
-  const resetLink = `http://localhost:3000/reset-password/${token}`;
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: 'Reset Your Password',
-    html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
-  };
+  // Check user exists first
+  db.query('SELECT id FROM usercredentials WHERE email = ?', [email], (err, results) => {
+    if (err) {
+      console.error('DB error during forgot-password:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Email not found' });
+    }
 
-  transporter.sendMail(mailOptions, (err) => {
-    if (err) return res.status(500).json({ message: 'Failed to send email' });
-    res.json({ message: 'Reset link sent to email' });
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: { rejectUnauthorized: false },
+    });
+
+    const resetLink = `http://localhost:3000/reset-password/${token}`;
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Reset Your Password',
+      html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
+    };
+
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) {
+        console.error('Email sending error:', err);
+        return res.status(500).json({ message: 'Failed to send email' });
+      }
+      res.json({ message: 'Reset link sent to email' });
+    });
   });
 });
 
@@ -77,17 +146,26 @@ router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
+  if (!password || password.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters' });
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const hashedPassword = await bcrypt.hash(password, 10);
     db.query('UPDATE usercredentials SET password = ? WHERE email = ?', [hashedPassword, decoded.email], (err) => {
-      if (err) return res.status(500).json({ message: 'Password reset failed' });
+      if (err) {
+        console.error('DB error during password reset:', err);
+        return res.status(500).json({ message: 'Password reset failed' });
+      }
       res.json({ message: 'Password reset successful' });
     });
-  } catch {
+  } catch (err) {
+    console.error('Invalid or expired token:', err);
     res.status(400).json({ message: 'Invalid or expired token' });
   }
 });
+
 
 // -------------------- USERS --------------------
 

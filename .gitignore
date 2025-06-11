@@ -1,23 +1,27 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Ignore all node_modules folders (recursive)
+**/node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Ignore build output (like React and backend dist builds)
+**/build/
+**/dist/
 
-# testing
-/coverage
+# Ignore environment variable files anywhere
+**/.env*
+!**/.env.example  # keep example env file if needed
 
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+# Ignore logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# macOS
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# Others (optional)
+.pnp
+.pnp.js
+coverage/
