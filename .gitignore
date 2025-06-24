@@ -1,27 +1,27 @@
-# Ignore all node_modules folders (recursive)
+# Node modules
 **/node_modules/
 
-# Ignore build output (like React and backend dist builds)
+# Build output
 **/build/
 **/dist/
 
-# Ignore environment variable files anywhere
+# Environment files
 **/.env*
-!**/.env.example  # keep example env file if needed
+!**/.env.example
 
-# Ignore logs
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# macOS
+# macOS system files
 .DS_Store
 
-# IDE files
+# IDE settings
 .vscode/
 .idea/
 
-# Others (optional)
+# Other (optional)
 .pnp
 .pnp.js
 coverage/

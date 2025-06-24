@@ -1,50 +1,89 @@
 import React, { useEffect, useState } from "react";
-import "../styles/DashboardHome.css";
+import "../styles/AdminDashboardHome.css";
 
 const DashboardHome = () => {
-  const [stats, setStats] = useState({
-    employees: 0,
-    pendingLeaves: 0,
-    presentToday: 0,
-  });
+  const [stats, setStats] = useState({ employees: 0, pendingLeaves: 0, presentToday: 0 });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const checkResponse = async (response) => {
+    const text = await response.text();
+
+    if (!response.ok) {
+      try {
+        const data = JSON.parse(text);
+        throw new Error(data.message || "Failed to fetch data");
+      } catch {
+        throw new Error(text || "Failed to fetch data");
+      }
+    }
+
+    return JSON.parse(text);
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
-  try {
-    const token = localStorage.getItem('token');
+      setLoading(true);
+      setError('');
+      try {
+        const token = localStorage.getItem("token");
 
-    const [empRes, leaveRes, attRes] = await Promise.all([
-      fetch('/api/employees', { headers: { Authorization: `Bearer ${token}` } }),
-      fetch('/api/leaves?status=pending', { headers: { Authorization: `Bearer ${token}` } }),
-      fetch('/api/attendance/today', { headers: { Authorization: `Bearer ${token}` } }),
-    ]);
+        if (!token) {
+          setError("No authentication token.");
+          setLoading(false);
+          return;
+        }
 
-    const employees = await empRes.json();
-    const pendingLeaves = await leaveRes.json();
-    const presentToday = await attRes.json();
+        // Perform requests in parallel
+        const [empRes, leaveRes, attRes] = await Promise.all([
+          fetch('http://localhost:3300/api/employees', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch('http://localhost:3300/api/leaves', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch('http://localhost:3300/api/attendance/today', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-    console.log('employees:', employees);
-    console.log('pendingLeaves:', pendingLeaves);
-    console.log('presentToday:', presentToday);
+        const employees = await checkResponse(empRes);
+        const allLeaves = await checkResponse(leaveRes);
+        const presentToday = await checkResponse(attRes);
 
-   setStats({
-  employees: Array.isArray(employees) ? employees.length : 0,
-  pendingLeaves: Array.isArray(pendingLeaves) ? pendingLeaves.length : 0,
-  presentToday: Array.isArray(presentToday) ? presentToday.length : presentToday.count || 0,
-});
+        const pendingLeaves = allLeaves.filter((leave) => leave.status === "pending");
 
-  } catch (err) {
-    console.error('Failed to load dashboard stats:', err);
-  }
-};
+        setStats({
+          employees: Array.isArray(employees) ? employees.length : 0,
+          pendingLeaves: pendingLeaves.length,
+          presentToday: Array.isArray(presentToday) ? presentToday.length : 0,
+        });
+
+      } catch (err) {
+        setError(err.message);
+        console.error("Failed to load dashboard stats.", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchStats();
   }, []);
 
+  if (loading) {
+    return <div>Loading dashboard stats...</div>;
+  }
+
   return (
-    <div className="dashboard-home">
+    <div className="admin-dashboard-home">
       <h1>Welcome to the Employee Management System</h1>
-      <p>Use the sidebar to navigate through employee records, attendance logs, and leave requests.</p>
+      <p>View key metrics and track workplace activity.</p>
+
+      {error && (
+        <div className="error-message" style={{ color: "red", marginBottom: "1rem" }}>
+          ⚡ {error}
+        </div>
+      )}
 
       <div className="dashboard-stats">
         <div className="stat-card">
@@ -53,7 +92,7 @@ const DashboardHome = () => {
         </div>
         <div className="stat-card">
           <h2>{stats.pendingLeaves}</h2>
-          <p>Pending Leave Requests</p>
+          <p>Pending Leaves</p>
         </div>
         <div className="stat-card">
           <h2>{stats.presentToday}</h2>

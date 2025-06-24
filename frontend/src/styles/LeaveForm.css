@@ -1,0 +1,66 @@
+.leave-form {
+  background: #2ba81f;
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  max-height: 800px;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.leave-form h2 {
+  color: #ffcc80;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.leave-form input[type="text"],
+.leave-form input[type="date"],
+.leave-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 5px;
+  background: #020b92;
+  color: #fff;
+}
+
+.leave-form input::placeholder,
+.leave-form textarea::placeholder {
+  color: #aaa;
+}
+
+.leave-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.leave-form button {
+  background: #ffcc80;
+  color: #103291;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.leave-form button:hover {
+  background: #ffc04d;
+}
+
+.leave-form .error-message {
+  color: #ff5252;
+  background: #fff1f1;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

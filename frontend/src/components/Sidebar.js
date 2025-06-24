@@ -2,7 +2,9 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import "../styles/Sidebar.css";
 
-const Sidebar = ({ onLogoutClick }) => {
+const Sidebar = ({ onLogoutClick, role }) => {
+  const isAdmin = role === "admin";
+
   return (
     <div className="sidebar">
       <h2 className="sidebar-title">EMS Dashboard</h2>
@@ -16,14 +18,18 @@ const Sidebar = ({ onLogoutClick }) => {
         >
           Home
         </NavLink>
-        <NavLink
-          to="/employees"
-          className={({ isActive }) =>
-            isActive ? "sidebar-link active" : "sidebar-link"
-          }
-        >
-          Employees
-        </NavLink>
+
+        {isAdmin && (
+          <NavLink
+            to="/employees"
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active" : "sidebar-link"
+            }
+          >
+            Employees
+          </NavLink>
+        )}
+
         <NavLink
           to="/attendance"
           className={({ isActive }) =>
@@ -32,6 +38,7 @@ const Sidebar = ({ onLogoutClick }) => {
         >
           Attendance
         </NavLink>
+
         <NavLink
           to="/leave-management"
           className={({ isActive }) =>
@@ -41,15 +48,16 @@ const Sidebar = ({ onLogoutClick }) => {
           Leave
         </NavLink>
 
-<NavLink
-  to="/users"
-  className={({ isActive }) =>
-    isActive ? "sidebar-link active" : "sidebar-link"
-  }
->
-  Users
-</NavLink>
-
+        {isAdmin && (
+          <NavLink
+            to="/users"
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active" : "sidebar-link"
+            }
+          >
+            Users
+          </NavLink>
+        )}
 
         <button onClick={onLogoutClick} className="logout-btn">
           Logout

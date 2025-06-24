@@ -1,22 +1,25 @@
-// backend/auth.js
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const verifyToken = (req, res, next) => {
+function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  console.log("Auth Header:", authHeader); // 🔍 Log this
+  if (!authHeader) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
-  const token = authHeader && authHeader.split(' ')[1];
-  console.log("Extracted token:", token); // 🔍 Log this
-
-  if (!token) return res.status(401).json({ message: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Access denied. Token missing.' });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
-    req.user = user;
+    if (err) return res.status(401).json({ message: 'Invalid or expired token' });
+    req.user = user; // { id, email, role }
     next();
   });
-};
+}
 
+function verifyAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden. Admin access required.' });
+  }
+  next();
+}
 
-module.exports = verifyToken;
+module.exports = { verifyAdmin, verifyToken };

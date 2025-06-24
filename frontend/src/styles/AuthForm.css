@@ -1,3 +1,8 @@
+/* Emoji-friendly font fallback */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
 * {
   cursor: auto !important;
 }
@@ -20,8 +25,6 @@ button, input, .submit-btn, .link-btn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
-
 
 .auth-container {
   min-height: 100vh;
@@ -96,13 +99,16 @@ button, input, .submit-btn, .link-btn {
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.2s ease;
-  background: #fafafa;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+  appearance: none;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #667eea;
-  background: white;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 

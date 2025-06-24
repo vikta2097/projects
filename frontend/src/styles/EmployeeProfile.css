@@ -1,0 +1,86 @@
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  color: #fff;
+  background-color: #1e1e2f;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.profile-container h2 {
+  color: #ffcc80;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.profile-info p {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.profile-info strong {
+  color: #ffcc80;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  color: #ffcc80;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #ffcc80;
+}
+
+button {
+  background-color: #424242;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+button[type="button"] {
+  background-color: #ff5252;
+  margin-left: 10px;
+}
+
+button[type="button"]:hover {
+  background-color: #ff1744;
+}
+
+.error-message {
+  color: #ff6f61;
+  margin-bottom: 10px;
+}
+
+.success-message {
+  color: #80e27e;
+  margin-bottom: 10px;
+}

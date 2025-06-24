@@ -1,0 +1,76 @@
+.admin-dashboard-home {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  margin-left: 250px; /* Space for sidebar */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937;
+}
+
+.admin-dashboard-home h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-home p {
+  color: #4b5563;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* Section Headings */
+.admin-dashboard-home .dashboard-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-dashboard-home .stat-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  flex: 1 1 150px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-dashboard-home .stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard-home .stat-card h2 {
+  font-size: 2.2rem;
+  color: #2563eb;
+  margin-bottom: 0.25rem;
+}
+
+.admin-dashboard-home .stat-card p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Error Message */
+.admin-dashboard-home .error-message {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-dashboard-home .dashboard-stats {
+    flex-direction: column;
+  }
+
+  .admin-dashboard-home {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}

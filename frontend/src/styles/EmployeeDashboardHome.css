@@ -1,0 +1,56 @@
+.dashboard-home {
+  padding: 20px;
+  background: #181818;
+  color: #fff;
+}
+
+.dashboard-home h1 {
+  margin-bottom: 20px;
+  color: #ffcc80;
+}
+
+.error-message {
+  color: #ff5252;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: #fff1f1;
+  border-radius: 5px;
+}
+
+.leave-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.leave-list li {
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #303030;
+  border-radius: 5px;
+}
+
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937;
+}
+
+/* The main content area, pushed right to avoid sidebar */
+.dashboard-content {
+  margin-left: 220px; /* same width as sidebar */
+  padding: 2rem;
+  flex-grow: 1;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Responsive: full width content when sidebar stacks */
+@media (max-width: 768px) {
+  .dashboard-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}

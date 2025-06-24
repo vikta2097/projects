@@ -14,26 +14,40 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      const res = await fetch("http://localhost:3300/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (!response.ok) {
-        setError(data?.message || `Login failed with status ${response.status}`);
+      if (!res.ok || !data.token) {
+        setError(data?.message || "Login failed.");
         return;
       }
 
-      // ✅ Store the token in localStorage for session persistence
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        onLoginSuccess && onLoginSuccess(); // Trigger login success
-      } else {
-        setError("Login failed: No token received.");
+      localStorage.setItem("token", data.token);
+
+      const profileRes = await fetch("http://localhost:3300/api/profile", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+
+      const profileData = await profileRes.json();
+
+      if (!profileRes.ok || !profileData.user?.role) {
+        setError("Failed to fetch user profile.");
+        return;
       }
+
+      localStorage.setItem("role", profileData.user.role);
+
+      onLoginSuccess({
+        token: data.token,
+        role: profileData.user.role,
+      });
+
     } catch (err) {
       console.error("Login error:", err);
       setError("Network error. Please try again.");
@@ -62,6 +76,8 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
             <input
               type="email"
               id="email"
+              name="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
@@ -75,6 +91,8 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
+                name="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"

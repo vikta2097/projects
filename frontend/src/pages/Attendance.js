@@ -10,23 +10,23 @@ function Attendance() {
     date: '',
     check_in: '',
     check_out: '',
-    status: '',
+    status: 'present', // default status
     check_in_location: '',
     check_out_location: '',
     worked_hours: '',
     is_late: false,
     remarks: '',
-    leave_type: '',
+    leave_type: '', // added leave_type
   });
   const [editingId, setEditingId] = useState(null);
 
-  // Helper function: format Date to YYYY-MM-DD
-const formatDate = (isoDate) => {
-  const date = new Date(isoDate);
-  return date.toISOString().split("T")[0]; // Returns yyyy-MM-dd
-};
+  // Format Date to YYYY-MM-DD
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return date.toISOString().split("T")[0];
+  };
 
-  // Helper function: format time HH:mm
+  // Format time HH:mm
   const formatTime = (date) => {
     const d = new Date(date);
     return d.toTimeString().slice(0, 5);
@@ -37,11 +37,12 @@ const formatDate = (isoDate) => {
     fetchEmployees();
 
     if (!editingId) {
-      // Auto-fill date and check_in on add mode
       setForm(form => ({
         ...form,
         date: formatDate(new Date()),
         check_in: formatTime(new Date()),
+        status: 'present',
+        leave_type: '',
       }));
     }
   }, [editingId]);
@@ -52,7 +53,7 @@ const formatDate = (isoDate) => {
       const res = await fetch('/api/attendance', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch attendance, status ' + res.status);
+      if (!res.ok) throw new Error('Failed to fetch attendance');
       const data = await res.json();
       setAttendance(data);
     } catch (err) {
@@ -115,10 +116,10 @@ const formatDate = (isoDate) => {
       alert(editingId ? 'Attendance updated' : 'Attendance recorded');
       setForm({
         employee_id: '',
-        date: formatDate(new Date()), // reset to today on new add
+        date: formatDate(new Date()),
         check_in: formatTime(new Date()),
         check_out: '',
-        status: '',
+        status: 'present',
         check_in_location: '',
         check_out_location: '',
         worked_hours: '',
@@ -145,7 +146,7 @@ const formatDate = (isoDate) => {
       worked_hours: record.worked_hours,
       is_late: record.is_late === 1 || record.is_late === true,
       remarks: record.remarks,
-      leave_type: record.leave_type,
+      leave_type: record.leave_type || '',
     });
     setEditingId(record.id);
   };
@@ -179,29 +180,61 @@ const formatDate = (isoDate) => {
               </option>
             ))}
           </select>
+
           <input type="date" name="date" value={form.date} onChange={handleChange} required />
+
           <input type="time" name="check_in" value={form.check_in} onChange={handleChange} />
+
           <input type="time" name="check_out" value={form.check_out} onChange={handleChange} />
-          <input name="status" value={form.status} onChange={handleChange} placeholder="Status" />
+
+          <select name="status" value={form.status} onChange={handleChange} required>
+            <option value="">Select Status</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="leave">Leave</option>
+            <option value="holiday">Holiday</option>
+          </select>
+
+          {form.status === 'leave' && (
+            <input
+              name="leave_type"
+              value={form.leave_type}
+              onChange={handleChange}
+              placeholder="Leave Type"
+              required
+            />
+          )}
+
           <input
             name="check_in_location"
             value={form.check_in_location}
             onChange={handleChange}
             placeholder="Check-in Location"
           />
+
           <input
             name="check_out_location"
             value={form.check_out_location}
             onChange={handleChange}
             placeholder="Check-out Location"
           />
-          <input name="worked_hours" value={form.worked_hours} onChange={handleChange} placeholder="Worked Hours" />
+
+          <input
+            name="worked_hours"
+            type="number"
+            step="0.01"
+            value={form.worked_hours}
+            onChange={handleChange}
+            placeholder="Worked Hours"
+          />
+
           <label>
             Late:
             <input type="checkbox" name="is_late" checked={form.is_late} onChange={handleChange} />
           </label>
+
           <input name="remarks" value={form.remarks} onChange={handleChange} placeholder="Remarks" />
-          <input name="leave_type" value={form.leave_type} onChange={handleChange} placeholder="Leave Type" />
+
           <button type="submit">{editingId ? 'Update' : 'Add'}</button>
           {editingId && (
             <button
@@ -213,7 +246,7 @@ const formatDate = (isoDate) => {
                   date: formatDate(new Date()),
                   check_in: formatTime(new Date()),
                   check_out: '',
-                  status: '',
+                  status: 'present',
                   check_in_location: '',
                   check_out_location: '',
                   worked_hours: '',
@@ -272,7 +305,7 @@ const formatDate = (isoDate) => {
                   <td>{rec.worked_hours}</td>
                   <td>{rec.is_late ? 'Yes' : 'No'}</td>
                   <td>{rec.remarks}</td>
-                  <td>{rec.leave_type}</td>
+                  <td>{rec.leave_type || '-'}</td>
                   <td>
                     <button onClick={() => handleEdit(rec)}>Edit</button>
                     <button onClick={() => handleDelete(rec.id)}>Delete</button>

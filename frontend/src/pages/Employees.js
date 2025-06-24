@@ -26,7 +26,7 @@ const Employees = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5100/api/employees", {
+      const res = await fetch("http://localhost:3300/api/employees", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -47,7 +47,7 @@ const Employees = () => {
   // Fetch all users for linking (admin responsibility)
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5100/api/users", {
+      const res = await fetch("http://localhost:3300/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -145,8 +145,8 @@ const Employees = () => {
     setLoading(true);
     const method = editingEmployee ? "PUT" : "POST";
     const url = editingEmployee
-      ? `http://localhost:5100/api/employees/${editingEmployee.id}`
-      : "http://localhost:5100/api/employees";
+      ? `http://localhost:3300/api/employees/${editingEmployee.id}`
+      : "http://localhost:3300/api/employees";
 
     try {
       const res = await fetch(url, {
@@ -224,7 +224,7 @@ const Employees = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5100/api/employees/${id}`, {
+      const res = await fetch(`http://localhost:3300/api/employees/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -259,7 +259,7 @@ const Employees = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5100/api/employees/${id}`, {
+      const res = await fetch(`http://localhost:3300/api/employees/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

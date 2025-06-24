@@ -1,94 +1,70 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import AuthForm from "./components/AuthForm";
-import AdminDashboard from "./components/AdminDashboard";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import AuthForm from "./components/AuthForm"; // Your auth form component
+import AdminDashboard from "./components/AdminDashboard"; // Your admin dashboard
+import UserDashboard from "./EmployeeDashboard/UserDashboard";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const validateToken = async () => {
-      const token = localStorage.getItem("token");
-      
-      if (!token) {
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch("http://localhost:5100/api/validate-token", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          setIsAuthenticated(true);
-        } else {
-          // Token is invalid, remove it
-          localStorage.removeItem("token");
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Token validation failed:", error);
-        localStorage.removeItem("token");
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    validateToken();
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token && role) {
+      setIsAuthenticated(true);
+      setUserRole(role);
+      setToken(token);
+    }
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = ({ token, role }) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", role);
     setIsAuthenticated(true);
+    setUserRole(role);
+    setToken(token);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     setIsAuthenticated(false);
+    setUserRole(null);
+    setToken(null);
   };
 
-  // Show loading spinner while validating token
-  if (isLoading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route
-        path="/login"
-        element={
-          isAuthenticated ? 
-            <Navigate to="/" replace /> : 
-            <AuthForm onLoginSuccess={handleLogin} />
-        }
-      />
-      
-      {/* Protected routes */}
-      <Route
-        path="/*"
-        element={
-          isAuthenticated ? 
-            <AdminDashboard onLogout={handleLogout} /> : 
-            <Navigate to="/login" replace />
-        }
-      />
-    </Routes>
+    
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : (
+              <AuthForm onLoginSuccess={handleLogin} />
+            )
+          }
+        />
+        <Route
+          path="/*"
+          element={
+            isAuthenticated ? (
+              userRole === "admin" ? (
+                <AdminDashboard role={userRole} token={token} onLogout={handleLogout} />
+              ) : (
+                <UserDashboard role={userRole} token={token} onLogout={handleLogout} />
+              )
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+      </Routes>
+
   );
 }
 

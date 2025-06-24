@@ -16,14 +16,26 @@ const Users = () => {
   });
   const [editUserId, setEditUserId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("token");
 
   const fetchUsers = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No token found. Skipping user fetch.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      const contentType = res.headers.get("content-type");
+      if (!res.ok || !contentType?.includes("application/json")) {
+        const errorText = await res.text();
+        throw new Error(`Unexpected response: ${errorText}`);
+      }
+
       const data = await res.json();
       setUsers(data);
     } catch (err) {
@@ -31,9 +43,15 @@ const Users = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No token found in localStorage.");
+      return;
+    }
+
     fetchUsers();
   }, [fetchUsers]);
 
@@ -44,6 +62,7 @@ const Users = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
 
     if (!formData.email || !formData.fullname || !formData.role || (!editUserId && !formData.password)) {
       alert("Please fill all required fields");
@@ -73,7 +92,9 @@ const Users = () => {
         body: JSON.stringify(formData),
       });
 
-      const result = await res.json();
+      const contentType = res.headers.get("content-type");
+      const isJson = contentType && contentType.includes("application/json");
+      const result = isJson ? await res.json() : { message: "Unexpected response" };
 
       if (!res.ok) {
         alert("Error: " + (result.message || "Unknown"));
@@ -93,7 +114,7 @@ const Users = () => {
       email: user.email,
       fullname: user.fullname,
       role: user.role,
-      password: "", // Leave blank unless admin wants to reset
+      password: "",
     });
     setEditUserId(user.id);
   };
@@ -104,6 +125,7 @@ const Users = () => {
   };
 
   const deleteUser = async (id) => {
+    const token = localStorage.getItem("token");
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
@@ -111,6 +133,7 @@ const Users = () => {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         setUsers((prev) => prev.filter((user) => user.id !== id));
       } else {
@@ -162,7 +185,6 @@ const Users = () => {
           onChange={handleChange}
           required={!editUserId}
         />
-
         <button type="submit">{editUserId ? "Update User" : "Add User"}</button>
         {editUserId && (
           <button type="button" onClick={cancelEdit} style={{ marginLeft: "10px" }}>

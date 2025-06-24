@@ -11,7 +11,7 @@ const PrivateRoute = ({ children }) => {
       return;
     }
 
-    fetch("http://localhost:3000/api/validate-token", {
+    fetch("http://localhost:3300/api/validate-token", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
