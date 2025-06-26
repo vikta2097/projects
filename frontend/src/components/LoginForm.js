@@ -29,7 +29,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
 
       localStorage.setItem("token", data.token);
 
-      const profileRes = await fetch("http://localhost:3300/api/profile", {
+      const profileRes = await fetch("http://localhost:3306/api/profile", {
         method: "GET",
         headers: { Authorization: `Bearer ${data.token}` },
       });
