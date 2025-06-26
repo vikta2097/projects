@@ -8,13 +8,15 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const BASE_URL = "https://projects-2-c3ms.onrender.com";
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3300/api/auth/login", {
+      const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -29,7 +31,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
 
       localStorage.setItem("token", data.token);
 
-      const profileRes = await fetch("http://localhost:3306/api/profile", {
+      const profileRes = await fetch(`${BASE_URL}/api/profile`, {
         method: "GET",
         headers: { Authorization: `Bearer ${data.token}` },
       });
