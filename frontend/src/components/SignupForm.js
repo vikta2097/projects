@@ -28,7 +28,7 @@ const SignupForm = ({ onLoginClick }) => {
     setLoading(true);
     
     try {
-      const res = await fetch("http://localhost:3300/api/register", {
+      const res = await fetch("http://localhost:3306/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullname: name, email, password }),
