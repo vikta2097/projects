@@ -12,13 +12,14 @@ const profileRoutes = require('./routes/profile');
 const employeesRoutes = require('./routes/employees');
 
 const app = express();
-const PORT = process.env.PORT || 3300;
+const PORT = process.env.PORT || 3000; // 3000 is now the safe fallback
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leaves', leavesRoutes);
@@ -43,5 +44,6 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
+
