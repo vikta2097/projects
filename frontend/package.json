@@ -15,11 +15,11 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:3300",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "homepage": ".",
   "browserslist": {
     "production": [
       ">0.2%",
