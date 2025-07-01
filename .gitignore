@@ -1,0 +1,27 @@
+# Node modules
+**/node_modules/
+
+# Build output
+**/build/
+**/dist/
+
+# Environment files
+**/.env*
+!**/.env.example
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS system files
+.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+# Other (optional)
+.pnp
+.pnp.js
+coverage/
