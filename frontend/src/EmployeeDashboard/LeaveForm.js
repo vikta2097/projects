@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import "../styles/LeaveForm.css";  // Adjust path as needed
 
-
-
-
 export default function LeaveForm({ onAdd }) {
   const [leaveType, setLeaveType] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -49,30 +46,42 @@ export default function LeaveForm({ onAdd }) {
       {error && <div className="error-message">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        <label htmlFor="leaveType">Leave Type</label>
         <input
+          id="leaveType"
           type="text"
           value={leaveType}
           onChange={(e) => setLeaveType(e.target.value)}
           placeholder="Leave Type"
           required
         />
+
+        <label htmlFor="startDate">Start Date</label>
         <input
+          id="startDate"
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
           required
         />
+
+        <label htmlFor="endDate">End Date</label>
         <input
+          id="endDate"
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
           required
         />
+
+        <label htmlFor="reason">Reason for Leave</label>
         <textarea
+          id="reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Reason for leave"
         />
+
         <button type="submit">Submit</button>
       </form>
     </div>

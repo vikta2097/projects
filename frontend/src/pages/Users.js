@@ -17,6 +17,8 @@ const Users = () => {
   const [editUserId, setEditUserId] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const baseUrl = "http://localhost:3300/api/users";
+
   const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -26,7 +28,7 @@ const Users = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/users", {
+      const res = await fetch(baseUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -43,15 +45,9 @@ const Users = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [baseUrl]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.warn("No token found in localStorage.");
-      return;
-    }
-
     fetchUsers();
   }, [fetchUsers]);
 
@@ -79,7 +75,7 @@ const Users = () => {
       return;
     }
 
-    const url = editUserId ? `/api/users/${editUserId}` : "/api/users";
+    const url = editUserId ? `${baseUrl}/${editUserId}` : baseUrl;
     const method = editUserId ? "PUT" : "POST";
 
     try {
@@ -106,6 +102,7 @@ const Users = () => {
       fetchUsers();
     } catch (err) {
       console.error("Error submitting user:", err);
+      alert("Network error. Please try again.");
     }
   };
 
@@ -129,7 +126,7 @@ const Users = () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`${baseUrl}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -141,6 +138,7 @@ const Users = () => {
       }
     } catch (err) {
       console.error("Error deleting user:", err);
+      alert("Network error. Please try again.");
     }
   };
 

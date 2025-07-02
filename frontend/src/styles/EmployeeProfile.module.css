@@ -1,4 +1,4 @@
-.profile-container {
+.profileContainer {
   max-width: 800px;
   margin: 0 auto;
   padding: 30px;
@@ -8,34 +8,34 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
-.profile-container h2 {
+.profileContainer h2 {
   color: #ffcc80;
   margin-bottom: 20px;
   font-size: 24px;
 }
 
-.profile-info p {
+.profileInfo p {
   margin-bottom: 10px;
   font-size: 16px;
 }
 
-.profile-info strong {
+.profileInfo strong {
   color: #ffcc80;
 }
 
-.form-group {
+.formGroup {
   margin-bottom: 15px;
 }
 
-.form-group label {
+.formGroup label {
   display: block;
   color: #ffcc80;
   margin-bottom: 5px;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
   width: 100%;
   padding: 10px;
   background-color: #333;
@@ -44,14 +44,14 @@
   border-radius: 5px;
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
   outline: none;
   border-color: #ffcc80;
 }
 
-button {
+.button {
   background-color: #424242;
   color: #fff;
   padding: 10px 20px;
@@ -62,25 +62,55 @@ button {
   transition: background 0.3s ease;
 }
 
-button:hover {
+.button:hover {
   background-color: #555;
 }
 
-button[type="button"] {
+.dangerButton {
   background-color: #ff5252;
   margin-left: 10px;
 }
 
-button[type="button"]:hover {
+.dangerButton:hover {
   background-color: #ff1744;
 }
 
-.error-message {
+.errorMessage {
   color: #ff6f61;
   margin-bottom: 10px;
 }
 
-.success-message {
+.successMessage {
   color: #80e27e;
   margin-bottom: 10px;
+}
+
+.buttonPrimary {
+  background-color: #424242;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.buttonPrimary:hover {
+  background-color: #555;
+}
+
+.buttonSecondary {
+  background-color: #ff5252;
+  margin-left: 10px;
+  cursor: pointer;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+.buttonSecondary:hover {
+  background-color: #ff1744;
 }

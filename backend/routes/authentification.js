@@ -61,11 +61,17 @@ router.post('/login', (req, res) => {
 
   db.query('SELECT * FROM usercredentials WHERE email = ?', [email], async (err, results) => {
     if (err) return res.status(500).json({ message: 'Database error' });
-    if (results.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
+    if (results.length === 0) {
+      console.log(`Login failed: no user for email ${email}`);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
     const user = results[0];
     const isMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!isMatch) {
+      console.log(`Login failed: password mismatch for email ${email}`);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn:'1h' });
     res.json({ token });

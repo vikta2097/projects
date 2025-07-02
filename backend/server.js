@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const { verifyToken, verifyAdmin } = require('./auth');
 
+
 const authRoutes = require('./routes/authentification');
 const userRoutes = require('./routes/users');
 const attendanceRoutes = require('./routes/attendance');
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leaves', leavesRoutes);

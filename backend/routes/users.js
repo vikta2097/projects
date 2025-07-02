@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../db');
-const { verifyAdmin } = require('../auth');
+const { verifyToken, verifyAdmin } = require('../auth');
 
-// Protect all routes here with admin middleware
+// Protect all routes: first verify token, then verify admin role
+router.use(verifyToken);
 router.use(verifyAdmin);
 
 // Get all users

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import '../styles/MyAttendance.css';
 
 function MyAttendance() {
@@ -33,12 +33,32 @@ function MyAttendance() {
     }
   };
 
+  // Reverse geocode coordinates to human-readable address
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+      );
+      if (!response.ok) throw new Error('Failed to reverse geocode');
+
+      const data = await response.json();
+      // The address field contains detailed info, you can pick the parts you want
+      // For example: city, town, village, or display_name for full address
+      return data.address.city || data.address.town || data.address.village || data.display_name || 'Unknown location';
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      return 'Unknown location';
+    }
+  };
+
   const getLocation = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        pos => {
-          const coords = `${pos.coords.latitude},${pos.coords.longitude}`;
-          setCheckInLocation(coords);
+        async pos => {
+          const { latitude, longitude } = pos.coords;
+          // Get the human-readable location name
+          const locationName = await reverseGeocode(latitude, longitude);
+          setCheckInLocation(locationName);
         },
         err => {
           console.warn('Location access denied:', err.message);

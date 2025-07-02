@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../styles/EmployeeProfile.css'; // Make sure this path is correct
+import styles from '../styles/EmployeeProfile.module.css'; // Updated CSS module import
 
 function EmployeeProfile() {
   const [profile, setProfile] = useState({
@@ -72,7 +72,6 @@ function EmployeeProfile() {
 
     try {
       const token = localStorage.getItem('token');
-      // Send only phone and address in body to prevent accidental updates to other fields
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: {
@@ -91,7 +90,6 @@ function EmployeeProfile() {
       }
 
       const updated = await res.json();
-      // Update the local profile state with updated phone and address (keep other fields intact)
       setProfile((prev) => ({
         ...prev,
         phone: updated.phone,
@@ -130,18 +128,18 @@ function EmployeeProfile() {
     })();
   };
 
-  if (loading) return <div className="loading">Loading profile...</div>;
-  if (error && !editMode) return <div className="error">Error: {error}</div>;
+  if (loading) return <div className={styles.loading}>Loading profile...</div>;
+  if (error && !editMode) return <div className={styles.errorMessage}>Error: {error}</div>;
 
   return (
-    <div className="profile-container">
+    <div className={styles.profileContainer}>
       <h2>Employee Profile</h2>
 
-      {error && <div className="error">{error}</div>}
-      {successMsg && <div className="success">{successMsg}</div>}
+      {error && <div className={styles.errorMessage}>{error}</div>}
+      {successMsg && <div className={styles.successMessage}>{successMsg}</div>}
 
       {!editMode ? (
-        <div className="profile-view">
+        <div className={styles.profileView}>
           <p><strong>Full Name:</strong> {profile.fullname || '-'}</p>
           <p><strong>Email:</strong> {profile.email || '-'}</p>
           <p><strong>Role:</strong> {profile.role || '-'}</p>
@@ -151,7 +149,9 @@ function EmployeeProfile() {
           <p><strong>Address:</strong> {profile.address || '-'}</p>
           <p><strong>Status:</strong> {profile.status || '-'}</p>
           <p><strong>Date of Hire:</strong> {profile.date_of_hire || '-'}</p>
-          <button onClick={() => setEditMode(true)} className="btn-primary">Edit Profile</button>
+          <button onClick={() => setEditMode(true)} className={styles.buttonPrimary}>
+            Edit Profile
+          </button>
         </div>
       ) : (
         <form
@@ -159,53 +159,62 @@ function EmployeeProfile() {
             e.preventDefault();
             handleSave();
           }}
-          className="profile-form"
+          className={styles.profileForm}
         >
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Full Name:</label>
             <input type="text" name="fullname" value={profile.fullname || ''} readOnly />
           </div>
-          <div className="form-group">
+
+          <div className={styles.formGroup}>
             <label>Email:</label>
             <input type="email" name="email" value={profile.email || ''} readOnly />
           </div>
-          <div className="form-group">
+
+          <div className={styles.formGroup}>
             <label>Role:</label>
             <input type="text" name="role" value={profile.role || ''} readOnly />
           </div>
-          <div className="form-group">
+
+          <div className={styles.formGroup}>
             <label>Department:</label>
             <input type="text" name="department" value={profile.department || ''} readOnly />
           </div>
-          <div className="form-group">
+
+          <div className={styles.formGroup}>
             <label>Job Title:</label>
             <input type="text" name="job_title" value={profile.job_title || ''} readOnly />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Phone:</label>
             <input type="tel" name="phone" value={profile.phone || ''} onChange={handleChange} />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Address:</label>
             <textarea name="address" value={profile.address || ''} onChange={handleChange} />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Status:</label>
             <input type="text" name="status" value={profile.status || ''} readOnly />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Date of Hire:</label>
             <input type="date" name="date_of_hire" value={profile.date_of_hire || ''} readOnly />
           </div>
 
-          <button type="submit" className="btn-primary" disabled={saving}>
+          <button type="submit" className={styles.buttonPrimary} disabled={saving}>
             {saving ? 'Saving...' : 'Save'}
           </button>
-          <button type="button" className="btn-secondary" onClick={handleCancel} disabled={saving}>
+          <button
+            type="button"
+            className={styles.buttonSecondary}
+            onClick={handleCancel}
+            disabled={saving}
+          >
             Cancel
           </button>
         </form>
