@@ -18,11 +18,11 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
-  "proxy": "http://localhost:3300",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "homepage": ".",
   "browserslist": {
     "production": [
       ">0.2%",
