@@ -10,7 +10,8 @@ const LeaveManagement = () => {
   const token = localStorage.getItem("token");
 
   // Base URL for API calls - adjust this to match your backend
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3300";
+  const API_BASE_URL = "http://localhost:3300";
+
 
   // Memoize fetchLeaves so useEffect dependency is stable
   const fetchLeaves = useCallback(async () => {

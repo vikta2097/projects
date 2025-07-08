@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/Attendance.css';
+import API_BASE_URL from '../api';
 
 function Attendance() {
   const [attendance, setAttendance] = useState([]);
@@ -10,23 +11,21 @@ function Attendance() {
     date: '',
     check_in: '',
     check_out: '',
-    status: 'present', // default status
+    status: 'present',
     check_in_location: '',
     check_out_location: '',
     worked_hours: '',
     is_late: false,
     remarks: '',
-    leave_type: '', // added leave_type
+    leave_type: '',
   });
   const [editingId, setEditingId] = useState(null);
 
-  // Format Date to YYYY-MM-DD
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
-    return date.toISOString().split("T")[0];
+    return date.toISOString().split('T')[0];
   };
 
-  // Format time HH:mm
   const formatTime = (date) => {
     const d = new Date(date);
     return d.toTimeString().slice(0, 5);
@@ -50,9 +49,13 @@ function Attendance() {
   const fetchAttendance = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/attendance', {
+      const res = await fetch(`${API_BASE_URL}/api/attendance`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        handleSessionExpired();
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch attendance');
       const data = await res.json();
       setAttendance(data);
@@ -65,9 +68,13 @@ function Attendance() {
   const fetchEmployees = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/employees', {
+      const res = await fetch(`${API_BASE_URL}/api/employees`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        handleSessionExpired();
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch employees');
       const data = await res.json();
       setEmployees(data);
@@ -87,6 +94,12 @@ function Attendance() {
     }
   };
 
+  const handleSessionExpired = () => {
+    alert('Session expired. Please log in again.');
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
+
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
     setForm({
@@ -100,7 +113,9 @@ function Attendance() {
     try {
       const token = localStorage.getItem('token');
       const method = editingId ? 'PUT' : 'POST';
-      const url = editingId ? `/api/attendance/${editingId}` : '/api/attendance';
+      const url = editingId
+        ? `${API_BASE_URL}/api/attendance/${editingId}`
+        : `${API_BASE_URL}/api/attendance`;
 
       const res = await fetch(url, {
         method,
@@ -110,6 +125,11 @@ function Attendance() {
         },
         body: JSON.stringify(form),
       });
+
+      if (res.status === 401) {
+        handleSessionExpired();
+        return;
+      }
 
       if (!res.ok) throw new Error('Error saving attendance record');
 
@@ -155,10 +175,14 @@ function Attendance() {
     if (!window.confirm('Delete this attendance record?')) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/attendance/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/attendance/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        handleSessionExpired();
+        return;
+      }
       if (!res.ok) throw new Error('Failed to delete attendance record');
       alert('Attendance record deleted');
       fetchAttendance();

@@ -114,3 +114,117 @@
 .buttonSecondary:hover {
   background-color: #ff1744;
 }
+
+.profileContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px;
+  color: #fff;
+  background-color: #1e1e2f;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.profileGrid {
+  display: flex;
+  gap: 40px;
+}
+
+.profileLeft {
+  flex: 2;
+}
+
+.profileRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profileImage {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 100px;
+  border: 3px solid #ffcc80;
+  margin-bottom: 15px;
+}
+
+.profilePlaceholder {
+  width: 200px;
+  height: 200px;
+  background: #444;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  margin-bottom: 15px;
+}
+
+.fileInput {
+  color: #ccc;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formGroup label {
+  display: block;
+  color: #ffcc80;
+  margin-bottom: 5px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+}
+
+.buttonPrimary {
+  background-color: #424242;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.buttonPrimary:hover {
+  background-color: #555;
+}
+
+.buttonSecondary {
+  background-color: #ff5252;
+  margin-left: 10px;
+  cursor: pointer;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+.buttonSecondary:hover {
+  background-color: #ff1744;
+}
+
+.errorMessage {
+  color: #ff6f61;
+  margin-bottom: 10px;
+}
+
+.successMessage {
+  color: #80e27e;
+  margin-bottom: 10px;
+}

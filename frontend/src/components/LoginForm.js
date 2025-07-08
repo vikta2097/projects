@@ -8,7 +8,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const BASE_URL = "https://projects-2-c3ms.onrender.com";
+ const BASE_URL = "http://localhost:3300";
 
   const handleLogin = async (e) => {
     e.preventDefault();

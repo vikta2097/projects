@@ -1,3 +1,4 @@
+/* Main Dashboard Container */
 .admin-dashboard-home {
   padding: 2rem;
   background-color: #f9f9f9;
@@ -5,27 +6,32 @@
   margin-left: 250px; /* Space for sidebar */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #1f2937;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Dashboard Title */
 .admin-dashboard-home h1 {
   font-size: 2rem;
   color: #1f2937;
   margin-bottom: 0.5rem;
 }
 
+/* Dashboard Subtitle */
 .admin-dashboard-home p {
   color: #4b5563;
   margin-bottom: 2rem;
   font-size: 1rem;
 }
 
-/* Section Headings */
+/* Dashboard Stats Container */
 .admin-dashboard-home .dashboard-stats {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
+/* Individual Stat Cards */
 .admin-dashboard-home .stat-card {
   background-color: #ffffff;
   padding: 1.5rem;
@@ -63,14 +69,14 @@
   font-weight: 600;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .admin-dashboard-home .dashboard-stats {
-    flex-direction: column;
-  }
-
   .admin-dashboard-home {
     margin-left: 0;
     padding: 1rem;
+  }
+
+  .admin-dashboard-home .dashboard-stats {
+    flex-direction: column;
   }
 }

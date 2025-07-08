@@ -48,6 +48,18 @@ const Sidebar = ({ onLogoutClick, role }) => {
           Leave
         </NavLink>
 
+      
+
+        {/* Messaging link */}
+        <NavLink
+          to="/messaging"
+          className={({ isActive }) =>
+            isActive ? "sidebar-link active" : "sidebar-link"
+          }
+        >
+          Messaging
+        </NavLink>
+
         {isAdmin && (
           <NavLink
             to="/users"

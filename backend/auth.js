@@ -9,7 +9,7 @@ function verifyToken(req, res, next) {
   if (!token) return res.status(401).json({ message: 'Access denied. Token missing.' });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(401).json({ message: 'Invalid or expired token' });
+    if (err) return res.status(401).json({ message: 'Invalid or session expired' });
     req.user = user; // { id, email, role }
     next();
   });

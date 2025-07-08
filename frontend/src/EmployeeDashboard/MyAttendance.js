@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useEffect, useState } from 'react';
 import '../styles/MyAttendance.css';
+import API_BASE_URL from '../api'; // ✅ Use the shared base URL
 
 function MyAttendance() {
   const [statusMessage, setStatusMessage] = useState('');
@@ -14,12 +15,23 @@ function MyAttendance() {
     getLocation();
   }, []);
 
+  const handleSessionExpired = () => {
+    alert('Session expired. Please log in again.');
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
+
   const checkIfMarkedToday = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/attendance/mine?date=${today}`, {
+      const res = await fetch(`${API_BASE_URL}/api/attendance/mine?date=${today}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        handleSessionExpired();
+        return;
+      }
 
       if (res.status === 200) {
         const data = await res.json();
@@ -33,7 +45,6 @@ function MyAttendance() {
     }
   };
 
-  // Reverse geocode coordinates to human-readable address
   const reverseGeocode = async (latitude, longitude) => {
     try {
       const response = await fetch(
@@ -42,8 +53,6 @@ function MyAttendance() {
       if (!response.ok) throw new Error('Failed to reverse geocode');
 
       const data = await response.json();
-      // The address field contains detailed info, you can pick the parts you want
-      // For example: city, town, village, or display_name for full address
       return data.address.city || data.address.town || data.address.village || data.display_name || 'Unknown location';
     } catch (error) {
       console.error('Reverse geocoding error:', error);
@@ -56,7 +65,6 @@ function MyAttendance() {
       navigator.geolocation.getCurrentPosition(
         async pos => {
           const { latitude, longitude } = pos.coords;
-          // Get the human-readable location name
           const locationName = await reverseGeocode(latitude, longitude);
           setCheckInLocation(locationName);
         },
@@ -74,7 +82,7 @@ function MyAttendance() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/attendance/mine', {
+      const res = await fetch(`${API_BASE_URL}/api/attendance/mine`, { // ✅ Updated URL
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,6 +93,11 @@ function MyAttendance() {
           check_in_location: checkInLocation,
         }),
       });
+
+      if (res.status === 401) {
+        handleSessionExpired();
+        return;
+      }
 
       const data = await res.json();
       if (res.ok) {

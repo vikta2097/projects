@@ -1,103 +1,30 @@
-const mysql = require('mysql');
+// test-bcrypt.js
+const bcrypt = require('bcrypt');
+const db = require('./db');
+require('dotenv').config();
 
-// Create a connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'simplelogin'
-});
+const emailToTest = 'thigamwangi2027@gmail.com';  // Change this to test a specific user email
+const passwordToTest = '12345678';      // The plaintext password you want to verify
 
-// Connect to MySQL
-db.connect(err => {
+db.query('SELECT password_hash FROM usercredentials WHERE email = ?', [emailToTest], async (err, results) => {
   if (err) {
-    console.error('❌ Database connection failed:', err);
-    return;
+    console.error('Database query error:', err);
+    process.exit(1);
   }
-  
-  console.log('✅ Connected to MySQL database.');
-  
-  // Test database query
-  db.query('SHOW TABLES', (err, results) => {
-    if (err) {
-      console.error('❌ Error querying tables:', err);
-      return;
-    }
-    
-    console.log('📋 Tables in the database:');
-    console.log(results);
-    
-    // Check if usercredentials table exists
-    const tables = results.map(row => Object.values(row)[0]);
-    if (tables.includes('usercredentials')) {
-      console.log('✅ usercredentials table exists');
-      
-      // Check table structure
-      db.query('DESCRIBE usercredentials', (err, fields) => {
-        if (err) {
-          console.error('❌ Error describing table:', err);
-          return;
-        }
-        
-        console.log('📋 Table structure:');
-        console.log(fields);
-        
-        // Test the insert query
-        const testUser = {
-          fullname: 'Test User',
-          email: `test${Date.now()}@example.com`,
-          password: 'password123'
-        };
-        
-        db.query(
-          'INSERT INTO usercredentials (fullname, email, password) VALUES (?, ?, ?)',
-          [testUser.fullname, testUser.email, testUser.password],
-          (err, result) => {
-            if (err) {
-              console.error('❌ Test insert failed:', err);
-            } else {
-              console.log('✅ Test insert successful:', result);
-              
-              // Clean up the test data
-              db.query('DELETE FROM usercredentials WHERE email = ?', [testUser.email], (err) => {
-                if (err) {
-                  console.error('❌ Failed to clean up test data:', err);
-                } else {
-                  console.log('✅ Test data cleaned up successfully');
-                }
-                
-                // Close the connection
-                db.end();
-              });
-            }
-          }
-        );
-      });
-    } else {
-      console.log('❌ usercredentials table does NOT exist');
-      
-      // Create the table
-      console.log('Creating usercredentials table...');
-      const createTableSQL = `
-        CREATE TABLE usercredentials (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          fullname VARCHAR(100) NOT NULL,
-          email VARCHAR(100) NOT NULL UNIQUE,
-          password VARCHAR(100) NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-      `;
-      
-      db.query(createTableSQL, (err) => {
-        if (err) {
-          console.error('❌ Failed to create table:', err);
-        } else {
-          console.log('✅ Table created successfully');
-        }
-        
-        // Close the connection
-        db.end();
-      });
-    }
-  });
+
+  if (results.length === 0) {
+    console.log('User not found.');
+    process.exit(0);
+  }
+
+  const hashedPassword = results[0].password_hash;
+
+  const match = await bcrypt.compare(passwordToTest, hashedPassword);
+  if (match) {
+    console.log('Password is correct!');
+  } else {
+    console.log('Password is incorrect!');
+  }
+
+  db.end();  // Close DB connection after test
 });

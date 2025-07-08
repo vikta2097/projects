@@ -25,3 +25,12 @@ yarn-error.log*
 .pnp
 .pnp.js
 coverage/
+
+# Ignore everything in uploads except /uploads/photos
+/uploads/*
+!/uploads/photos/
+/uploads/photos/*
+!*/photos/*.jpg
+!*/photos/*.jpeg
+!*/photos/*.png
+!*/photos/*.webp

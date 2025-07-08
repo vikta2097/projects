@@ -7,6 +7,9 @@ import Employees from "../pages/Employees";
 import Attendance from "../pages/Attendance";
 import LeaveManagement from "../pages/LeaveManagement";
 import "../styles/AdminDashboardHome.css";
+import Notifications from "../pages/Notifications";
+
+
 
 export default function AdminDashboard({ onLogout, role }) {
   const isAdmin = role === "admin";
@@ -20,6 +23,8 @@ export default function AdminDashboard({ onLogout, role }) {
           <Route path="/" element={<DashboardHome />} />
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/leave-management" element={<LeaveManagement />} />
+          <Route path="/notifications" element={<Notifications />} />
+
 
           {/* Admin-only routes */}
           {isAdmin && <Route path="/employees" element={<Employees />} />}

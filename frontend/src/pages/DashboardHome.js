@@ -1,40 +1,41 @@
 import React, { useEffect, useState } from "react";
 import "../styles/AdminDashboardHome.css";
+import NotificationComponent from "../pages/Notifications";
 
 const DashboardHome = () => {
   const [stats, setStats] = useState({ employees: 0, pendingLeaves: 0, presentToday: 0 });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
-  const checkResponse = async (response) => {
-    const text = await response.text();
-
-    if (!response.ok) {
-      try {
-        const data = JSON.parse(text);
-        throw new Error(data.message || "Failed to fetch data");
-      } catch {
-        throw new Error(text || "Failed to fetch data");
-      }
-    }
-
-    return JSON.parse(text);
-  };
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true);
-      setError('');
+    const getUserIdFromToken = () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) return null;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.id || payload.userId || payload.sub;
+      } catch (err) {
+        console.error("Failed to decode token", err);
+        return null;
+      }
+    };
 
-        if (!token) {
-          setError("No authentication token.");
-          setLoading(false);
-          return;
-        }
 
-        // Perform requests in parallel
+  useEffect(() => {
+    const uid = getUserIdFromToken();
+    if (uid) setUserId(uid);
+    console.log("🧪 Admin dashboard userId:", uid);
+
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("No authentication token.");
+      return;
+    }
+
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
         const [empRes, leaveRes, attRes] = await Promise.all([
           fetch('http://localhost:3300/api/employees', {
             headers: { Authorization: `Bearer ${token}` },
@@ -47,21 +48,20 @@ const DashboardHome = () => {
           }),
         ]);
 
-        const employees = await checkResponse(empRes);
-        const allLeaves = await checkResponse(leaveRes);
-        const presentToday = await checkResponse(attRes);
+        const employees = await empRes.json();
+        const allLeaves = await leaveRes.json();
+        const presentToday = await attRes.json();
 
         const pendingLeaves = allLeaves.filter((leave) => leave.status === "pending");
 
         setStats({
-          employees: Array.isArray(employees) ? employees.length : 0,
+          employees: employees.length,
           pendingLeaves: pendingLeaves.length,
-          presentToday: Array.isArray(presentToday) ? presentToday.length : 0,
+          presentToday: presentToday.length,
         });
-
       } catch (err) {
+        console.error("Error loading stats:", err);
         setError(err.message);
-        console.error("Failed to load dashboard stats.", err);
       } finally {
         setLoading(false);
       }
@@ -70,33 +70,34 @@ const DashboardHome = () => {
     fetchStats();
   }, []);
 
-  if (loading) {
-    return <div>Loading dashboard stats...</div>;
-  }
+  if (loading) return <div>Loading dashboard stats...</div>;
 
   return (
-    <div className="admin-dashboard-home">
-      <h1>Welcome to the Employee Management System</h1>
-      <p>View key metrics and track workplace activity.</p>
+    <div>
+      {/* ✅ Correct userId passed to NotificationComponent */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem', borderBottom: '1px solid #e5e7eb' }}>
+        {userId && <NotificationComponent userId={userId} />}
+      </div>
 
-      {error && (
-        <div className="error-message" style={{ color: "red", marginBottom: "1rem" }}>
-          ⚡ {error}
-        </div>
-      )}
+      <div className="admin-dashboard-home">
+        <h1>Welcome to the Employee Management System</h1>
+        <p>View key metrics and track workplace activity.</p>
 
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <h2>{stats.employees}</h2>
-          <p>Employees</p>
-        </div>
-        <div className="stat-card">
-          <h2>{stats.pendingLeaves}</h2>
-          <p>Pending Leaves</p>
-        </div>
-        <div className="stat-card">
-          <h2>{stats.presentToday}</h2>
-          <p>Present Today</p>
+        {error && <div className="error-message">⚡ {error}</div>}
+
+        <div className="dashboard-stats">
+          <div className="stat-card">
+            <h2>{stats.employees}</h2>
+            <p>Employees</p>
+          </div>
+          <div className="stat-card">
+            <h2>{stats.pendingLeaves}</h2>
+            <p>Pending Leaves</p>
+          </div>
+          <div className="stat-card">
+            <h2>{stats.presentToday}</h2>
+            <p>Present Today</p>
+          </div>
         </div>
       </div>
     </div>

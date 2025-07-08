@@ -4,9 +4,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const db = require('../db');
-
+const { verifyToken } = require('../auth');
 require('dotenv').config();
 
+// Utility Functions
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -15,7 +16,7 @@ function isValidPassword(password) {
   return /^(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{6,}$/.test(password);
 }
 
-// REGISTER
+// ✅ REGISTER
 router.post('/register', async (req, res) => {
   const { email, password, fullname, role } = req.body;
 
@@ -27,7 +28,7 @@ router.post('/register', async (req, res) => {
   }
   if (!isValidPassword(password)) {
     return res.status(400).json({ 
-      message: 'Password must be at least 6 chars with a number, a special character, and a lowercase letter'
+      message: 'Password must be at least 6 characters with a number, a special character, and a lowercase letter'
     });
   }
 
@@ -53,41 +54,43 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// LOGIN
+// ✅ LOGIN
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) return res.status(400).json({ message: 'Email and password are required' });
+  if (!email || !password) 
+    return res.status(400).json({ message: 'Email and password are required' });
 
-  db.query('SELECT * FROM usercredentials WHERE email = ?', [email], async (err, results) => {
+  db.query('SELECT * FROM usercredentials WHERE email = ?', [email], (err, results) => {
     if (err) return res.status(500).json({ message: 'Database error' });
-    if (results.length === 0) {
-      console.log(`Login failed: no user for email ${email}`);
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+
+    if (results.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
 
     const user = results[0];
-    const isMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isMatch) {
-      console.log(`Login failed: password mismatch for email ${email}`);
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn:'1h' });
-    res.json({ token });
+    bcrypt.compare(password, user.password_hash, (err, isMatch) => {
+      if (err) return res.status(500).json({ message: 'Server error' });
+
+      if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role, fullname: user.fullname },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      res.json({ token });
+    });
   });
 });
 
-// Forgot password (send reset link)
+// ✅ Forgot Password
 router.post('/forgot-password', (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email is required' });
 
   db.query('SELECT id FROM usercredentials WHERE email = ?', [email], (err, results) => {
-    if (err) {
-      console.error('DB error during password reset!', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
+    if (err) return res.status(500).json({ message: 'Database error' });
     if (results.length === 0) return res.status(404).json({ message: 'Email not found' });
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
@@ -110,16 +113,13 @@ router.post('/forgot-password', (req, res) => {
     };
 
     transporter.sendMail(mailOptions, (err) => {
-      if (err) {
-        console.error('Email sending error!', err);
-        return res.status(500).json({ message: 'Failed to send email' });
-      }
+      if (err) return res.status(500).json({ message: 'Failed to send email' });
       res.json({ message: 'Reset link sent to email' });
     });
   });
 });
 
-// Reset password (via token)
+// ✅ Reset Password
 router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -135,16 +135,18 @@ router.post('/reset-password/:token', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     db.query('UPDATE usercredentials SET password_hash = ? WHERE email = ?', [hashedPassword, decoded.email], (err) => {
-      if (err) {
-        console.error('DB error during password reset!', err);
-        return res.status(500).json({ message: 'Password reset failed' });
-      }
+      if (err) return res.status(500).json({ message: 'Password reset failed' });
       res.json({ message: 'Password reset successful' });
     });
   } catch (err) {
-    console.error('Invalid or expired token!', err);
     res.status(400).json({ message: 'Invalid or expired token' });
   }
+});
+
+// ✅ Get Current User
+router.get('/me', verifyToken, (req, res) => {
+  const { id, email, role, fullname } = req.user;
+  res.json({ id, email, role, fullname });
 });
 
 module.exports = router;

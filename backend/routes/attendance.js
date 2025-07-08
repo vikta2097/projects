@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { verifyToken } = require('../auth');
+const { sendNotificationDirect, NOTIFICATION_TYPES, PRIORITY_LEVELS } = require('./notifications');
 
 // Utility function to update attendance for leave days
 const updateAttendanceForLeave = async (employee_id, start_date, end_date, leave_type) => {
@@ -73,11 +74,25 @@ router.post('/', verifyToken, async (req, res) => {
       employee_id, date, check_in, check_out, status,
       check_in_location, check_out_location, worked_hours,
       is_late ? 1 : 0, remarks, leave_type
-    ], (err, result) => {
+    ], async (err, result) => {
       if (err) {
         console.error('Error inserting attendance:', err);
         return res.status(500).json({ message: 'Error inserting attendance' });
       }
+
+      // Send notification to employee about attendance recorded
+      try {
+        await sendNotificationDirect({
+          userId: employee_id,
+          title: 'Attendance Recorded',
+          message: `Your attendance for ${date} has been marked as ${status}.`,
+          type: NOTIFICATION_TYPES.INFO,
+          priority: PRIORITY_LEVELS.MEDIUM,
+        });
+      } catch (notifyErr) {
+        console.error('Failed to send attendance notification:', notifyErr);
+      }
+
       res.status(201).json({ message: 'Attendance recorded', id: result.insertId });
     });
   } catch (err) {
@@ -107,9 +122,23 @@ router.put('/:id', verifyToken, (req, res) => {
     employee_id, date, check_in, check_out, status,
     check_in_location, check_out_location, worked_hours,
     is_late ? 1 : 0, remarks, leave_type, id
-  ], (err, result) => {
+  ], async (err, result) => {
     if (err) return res.status(500).json({ message: 'Error updating attendance' });
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Attendance not found' });
+
+    // Send notification to employee about attendance update
+    try {
+      await sendNotificationDirect({
+        userId: employee_id,
+        title: 'Attendance Updated',
+        message: `Your attendance on ${date} was updated to status: ${status}.`,
+        type: NOTIFICATION_TYPES.INFO,
+        priority: PRIORITY_LEVELS.MEDIUM,
+      });
+    } catch (notifyErr) {
+      console.error('Failed to send attendance update notification:', notifyErr);
+    }
+
     res.json({ message: 'Attendance updated' });
   });
 });
@@ -160,10 +189,24 @@ router.post('/mine', verifyToken, (req, res) => {
         is_late = VALUES(is_late)
     `;
 
-    db.query(sql, [employee_id, formattedDate, checkIn, check_in_location, isLate ? 1 : 0], (err) => {
+    db.query(sql, [employee_id, formattedDate, checkIn, check_in_location, isLate ? 1 : 0], async (err) => {
       if (err) {
         return res.status(500).json({ message: 'Failed to mark attendance' });
       }
+
+      // Notify user about successful check-in
+      try {
+        await sendNotificationDirect({
+          userId: userId,
+          title: 'Attendance Check-in Successful',
+          message: `You checked in at ${checkIn} on ${formattedDate}.`,
+          type: NOTIFICATION_TYPES.INFO,
+          priority: PRIORITY_LEVELS.MEDIUM,
+        });
+      } catch (notifyErr) {
+        console.error('Failed to send check-in notification:', notifyErr);
+      }
+
       res.status(201).json({ message: 'Attendance marked' });
     });
   });

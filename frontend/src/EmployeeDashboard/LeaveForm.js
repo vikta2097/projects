@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "../styles/LeaveForm.css";  // Adjust path as needed
+import API_BASE_URL from "../api";  // Adjust path if needed
+import "../styles/LeaveForm.css";
 
 export default function LeaveForm({ onAdd }) {
   const [leaveType, setLeaveType] = useState("");
@@ -15,7 +16,7 @@ export default function LeaveForm({ onAdd }) {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch("/api/leaves", {
+      const res = await fetch(`${API_BASE_URL}/api/leaves`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

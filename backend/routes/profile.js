@@ -2,13 +2,30 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { verifyToken } = require('../auth');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Multer storage config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '..', 'uploads', 'photos');
+    fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, `user-${req.user.id}-${Date.now()}${ext}`);
+  },
+});
+const upload = multer({ storage });
 
 // GET logged in user's profile
 router.get('/', verifyToken, (req, res) => {
   const userId = req.user.id;
 
   const sql = `
-    SELECT u.fullname, u.email, u.role, e.department, e.job_title, e.phone, e.address, e.status, e.date_of_hire
+    SELECT u.fullname, u.email, u.role, e.department, e.job_title, e.phone, e.address, e.status, e.date_of_hire, e.profile_photo
     FROM usercredentials u
     LEFT JOIN employees e ON u.id = e.user_id
     WHERE u.id = ?
@@ -43,6 +60,23 @@ router.put('/', verifyToken, (req, res) => {
 
     res.json({ phone, address });
   });
+});
+
+// Upload profile photo
+router.post('/photo', verifyToken, upload.single('photo'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No photo uploaded' });
+
+  const photoPath = `/uploads/photos/${req.file.filename}`;
+  const userId = req.user.id;
+
+  db.query(
+    'UPDATE employees SET profile_photo = ? WHERE user_id = ?',
+    [photoPath, userId],
+    (err, result) => {
+      if (err) return res.status(500).json({ message: 'Failed to save photo' });
+      res.json({ message: 'Photo uploaded', photo: photoPath });
+    }
+  );
 });
 
 module.exports = router;

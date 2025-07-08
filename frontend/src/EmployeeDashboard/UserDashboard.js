@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import Notifications from '../pages/Notifications';
 
 import EmployeeSidebar from "./EmployeeSidebar";
 import EmployeeDashboardHome from "./EmployeeDashboardHome";
@@ -21,6 +22,7 @@ export default function UserDashboard({ onLogout, role }) {
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="/Attendance" element={<MyAttendance />} />
           <Route path="/Profile" element={<EmployeeProfile />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </div>
     </div>
