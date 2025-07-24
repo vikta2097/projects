@@ -2,6 +2,20 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+
+const { verifyToken } = require('../auth'); // Adjust path as needed
+
+router.get('/me', verifyToken, (req, res) => {
+  const userId = req.user.id; // from JWT token after verification
+
+  const sql = 'SELECT * FROM employees WHERE user_id = ?';
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error fetching employee record' });
+    if (results.length === 0) return res.status(404).json({ message: 'Employee record not found' });
+    res.json(results[0]);
+  });
+});
+
 // Get all employees with user info
 router.get('/', (req, res) => {
   const query = `SELECT e.*, u.email, u.fullname FROM employees e JOIN usercredentials u ON e.user_id = u.id`;

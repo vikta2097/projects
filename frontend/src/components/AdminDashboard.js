@@ -13,7 +13,8 @@ import AdminPayroll from "../pages/AdminPayroll"; // <-- ✅ ADD THIS IMPORT
 import "../styles/AdminDashboardHome.css";
 
 export default function AdminDashboard({ onLogout, role }) {
-  const isAdmin = role === "admin";
+  // Accept both admin and admin-employee as admins
+  const isAdmin = role === "admin" || role === "admin-employee";
 
   const token = localStorage.getItem("token");
   let userId = null;

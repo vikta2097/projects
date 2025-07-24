@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-import AuthForm from "./components/AuthForm"; // Your auth form component
-import AdminDashboard from "./components/AdminDashboard"; // Your admin dashboard
+import AuthForm from "./components/AuthForm";
+import DualDashboardView from "./components/DualDashboardView"; // import the toggle wrapper
 import UserDashboard from "./EmployeeDashboard/UserDashboard";
 
 function App() {
@@ -11,12 +11,12 @@ function App() {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    if (token && role) {
+    const storedToken = localStorage.getItem("token");
+    const storedRole = localStorage.getItem("role");
+    if (storedToken && storedRole) {
       setIsAuthenticated(true);
-      setUserRole(role);
-      setToken(token);
+      setUserRole(storedRole);
+      setToken(storedToken);
     }
   }, []);
 
@@ -37,8 +37,9 @@ function App() {
   };
 
   return (
-    
+    <Router>
       <Routes>
+        {/* Public Route */}
         <Route
           path="/login"
           element={
@@ -49,12 +50,14 @@ function App() {
             )
           }
         />
+
+        {/* Protected Route */}
         <Route
           path="/*"
           element={
             isAuthenticated ? (
-              userRole === "admin" ? (
-                <AdminDashboard role={userRole} token={token} onLogout={handleLogout} />
+              userRole === "admin" || userRole === "admin-employee" ? (
+                <DualDashboardView token={token} onLogout={handleLogout} />
               ) : (
                 <UserDashboard role={userRole} token={token} onLogout={handleLogout} />
               )
@@ -64,7 +67,7 @@ function App() {
           }
         />
       </Routes>
-
+    </Router>
   );
 }
 
