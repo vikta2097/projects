@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import "../styles/EmployeeSidebar.css";  // Adjust path as needed
+import "../styles/EmployeeSidebar.css";
 
 export default function EmployeeSidebar({ onLogoutClick, role }) {
   return (
@@ -19,11 +19,18 @@ export default function EmployeeSidebar({ onLogoutClick, role }) {
         <NavLink to="/leave-management" className={({ isActive }) => (isActive ? "active" : "")}>
           Apply for Leave
         </NavLink>
-        
+
+        <NavLink to="/payslips" className={({ isActive }) => (isActive ? "active" : "")}>
+          Payslips
+        </NavLink>
+
         <NavLink to="/profile" className={({ isActive }) => (isActive ? "active" : "")}>
           Profile
         </NavLink>
 
+        <NavLink to="/messages" className={({ isActive }) => (isActive ? "active" : "")}>
+          Messages
+        </NavLink>
 
         <button className="logout-btn" onClick={onLogoutClick}>
           Logout

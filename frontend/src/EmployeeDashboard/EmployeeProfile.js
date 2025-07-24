@@ -40,6 +40,12 @@ function EmployeeProfile() {
         if (data.date_of_hire) {
           data.date_of_hire = formatDateInput(data.date_of_hire);
         }
+        
+        // Fix: Convert profile_photo to photoUrl and construct full URL
+        if (data.profile_photo) {
+          data.photoUrl = `${API_BASE_URL}${data.profile_photo}`;
+        }
+        
         setProfile(data);
       } catch (err) {
         setError(err.message);
@@ -121,6 +127,12 @@ function EmployeeProfile() {
         if (!res.ok) throw new Error('Failed to fetch profile');
         const data = await res.json();
         if (data.date_of_hire) data.date_of_hire = formatDateInput(data.date_of_hire);
+        
+        // Fix: Convert profile_photo to photoUrl and construct full URL
+        if (data.profile_photo) {
+          data.photoUrl = `${API_BASE_URL}${data.profile_photo}`;
+        }
+        
         setProfile(data);
       } catch {
         // ignore
@@ -149,7 +161,14 @@ function EmployeeProfile() {
 
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      setProfile((prev) => ({ ...prev, photoUrl: data.photoUrl }));
+      
+      // Fix: Update photoUrl with the full URL
+      setProfile((prev) => ({ 
+        ...prev, 
+        photoUrl: `${API_BASE_URL}${data.photo}` 
+      }));
+      
+      setSuccessMsg('Photo uploaded successfully');
     } catch (err) {
       setError(err.message);
     }

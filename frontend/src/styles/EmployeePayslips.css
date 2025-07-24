@@ -1,0 +1,148 @@
+/* EmployeePayslips.css */
+
+.employee-payslips-card {
+  max-width: 900px;
+  margin: 3rem auto;
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 6px 18px rgba(0,0,50,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #0d1a3a;
+}
+
+.employee-payslips-card h2 {
+  font-weight: 700;
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  color: #003366;
+  text-align: center;
+}
+
+.payslip-info {
+  margin-bottom: 2rem;
+}
+
+.payslip-info p {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.payslip-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.payslip-table th, .payslip-table td {
+  border: 1px solid #d0dfff;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.payslip-table th {
+  background-color: #f0f5ff;
+  color: #003366;
+  font-weight: 600;
+}
+
+.payslip-table tbody tr:nth-child(even) {
+  background-color: #fafcff;
+}
+
+.status-message {
+  margin-top: 1.5rem;
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.status-message.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.download-btn {
+  background-color: #005bb5;
+  border: none;
+  color: white;
+  padding: 0.3rem 0.7rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #003d80;
+}
+
+.payslip-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.payslip-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.payslip-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.payslip-section {
+  margin-bottom: 20px;
+}
+
+.advance-payments {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.advance-payment-item {
+  border-left: 3px solid #007bff;
+  padding-left: 10px;
+  margin: 10px 0;
+}
+
+.net-salary {
+  font-size: 1.2em;
+  color: #28a745;
+}
+
+.view-btn, .download-btn {
+  margin-right: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+}

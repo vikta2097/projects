@@ -6,13 +6,25 @@ import DashboardHome from "../pages/DashboardHome";
 import Employees from "../pages/Employees";
 import Attendance from "../pages/Attendance";
 import LeaveManagement from "../pages/LeaveManagement";
-import "../styles/AdminDashboardHome.css";
 import Notifications from "../pages/Notifications";
+import Messaging from "../EmployeeDashboard/messaging";
+import AdminPayroll from "../pages/AdminPayroll"; // <-- ✅ ADD THIS IMPORT
 
-
+import "../styles/AdminDashboardHome.css";
 
 export default function AdminDashboard({ onLogout, role }) {
   const isAdmin = role === "admin";
+
+  const token = localStorage.getItem("token");
+  let userId = null;
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      userId = payload.id;
+    } catch (err) {
+      console.error("Invalid token", err);
+    }
+  }
 
   return (
     <div className="dashboard-container">
@@ -24,10 +36,11 @@ export default function AdminDashboard({ onLogout, role }) {
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/leave-management" element={<LeaveManagement />} />
           <Route path="/notifications" element={<Notifications />} />
-
+          <Route path="/messages" element={<Messaging userId={userId} />} />
 
           {/* Admin-only routes */}
           {isAdmin && <Route path="/employees" element={<Employees />} />}
+          {isAdmin && <Route path="/payroll" element={<AdminPayroll />} />} {/* ✅ Payroll Route */}
           {isAdmin && <Route path="/users" element={<Users />} />}
 
           {/* Fallback route */}

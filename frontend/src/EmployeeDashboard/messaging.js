@@ -1,190 +1,323 @@
-import React, { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
+import React, { useEffect, useState, useRef } from "react";
+import { io } from "socket.io-client";
 
-function Messaging() {
+import "../styles/Messaging.css";
+
+function Messaging({ userId }) {
   const [conversations, setConversations] = useState([]);
   const [selectedConv, setSelectedConv] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [socket, setSocket] = useState(null);
+  const [file, setFile] = useState(null);
+  const [showStartChatModal, setShowStartChatModal] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [searchUser, setSearchUser] = useState("");
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const fileInputRef = useRef();
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3300/api";
 
-  const token = localStorage.getItem('token');
-  const userId = localStorage.getItem('userId'); // Ensure you store userId on login
-
+  // Initialize socket once on userId change
   useEffect(() => {
-    // Connect to Socket.io server
-    const newSocket = io('http://localhost:3300'); // Change port if needed
-    setSocket(newSocket);
+    if (!userId) return;
 
-    // Identify the user to the server
-    if (userId) {
-      newSocket.emit('identify', userId);
-    }
+    const socketURL = API_URL.replace("/api", "");
+    const sock = io(socketURL, { autoConnect: true });
 
-    // Listen for incoming messages
-    newSocket.on('receive-message', (message) => {
-      // Check if the incoming message belongs to the selected conversation
-      if (selectedConv && message.conversationId === selectedConv.conversationId) {
-        setMessages((prev) => [...prev, message]);
-      }
-    });
+    sock.emit("identify", userId);
+    setSocket(sock);
 
     return () => {
-      newSocket.disconnect();
+      sock.disconnect();
     };
-  }, [userId, selectedConv]);
+  }, [userId]);
 
+  // Listen for incoming messages when socket or selectedConv changes
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    if (!socket) return;
 
-  const fetchConversations = async () => {
-    try {
-      const res = await fetch('/api/messages/conversations', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+    function onMessage(msg) {
+      if (selectedConv && msg.conversationId === selectedConv.conversationId) {
+        setMessages((prev) => [...prev, msg]);
+      }
+    }
+
+    socket.on("receive-message", onMessage);
+
+    return () => {
+      socket.off("receive-message", onMessage);
+    };
+  }, [socket, selectedConv]);
+
+  // Fetch conversations
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoadingConversations(true);
+    fetch(`${API_URL}/messages/conversations`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch conversations");
+        return res.json();
+      })
+      .then((data) => {
         setConversations(data);
-      } else {
-        console.error('Failed to load conversations');
-      }
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
-    }
-  };
-
-  const fetchMessages = async (convId) => {
-    try {
-      const res = await fetch(`/api/messages/conversations/${convId}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data);
-      } else {
-        console.error('Failed to load messages');
-      }
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
-  const selectConversation = (conv) => {
-    setSelectedConv(conv);
-    fetchMessages(conv.conversationId);
-  };
-
-  const sendMessage = async () => {
-    if (!newMsg.trim()) return;
-
-    try {
-      const res = await fetch(
-        `/api/messages/conversations/${selectedConv.conversationId}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ content: newMsg }),
+        if (data.length > 0) {
+          setSelectedConv(data[0]); // Auto-select first conversation
+        } else {
+          setSelectedConv(null);
+          setMessages([]);
         }
-      );
+      })
+      .catch((err) => {
+        console.error(err);
+        setConversations([]);
+        setSelectedConv(null);
+        setMessages([]);
+      })
+      .finally(() => setLoadingConversations(false));
+  }, [userId]);
 
-      if (res.ok) {
-        // Immediately add the sent message locally
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now(), // Temporary ID
-            sender_id: userId,
-            sender_name: 'You',
-            content: newMsg,
-            created_at: new Date().toISOString(),
-          },
-        ]);
-        setNewMsg('');
-      } else {
-        alert('Failed to send message');
-      }
-    } catch (error) {
-      alert('Error sending message');
-      console.error(error);
+  // Fetch messages for selected conversation
+  useEffect(() => {
+    if (!selectedConv) {
+      setMessages([]);
+      return;
     }
+
+    setLoadingMessages(true);
+    fetch(`${API_URL}/messages/conversations/${selectedConv.conversationId}/messages`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch messages");
+        return res.json();
+      })
+      .then(setMessages)
+      .catch((err) => {
+        console.error(err);
+        setMessages([]);
+      })
+      .finally(() => setLoadingMessages(false));
+  }, [selectedConv]);
+
+  // Fetch available users for new chat modal
+  useEffect(() => {
+    if (!showStartChatModal) return;
+
+    setLoadingUsers(true);
+    fetch(`${API_URL}/messages/available-users`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch available users");
+        return res.json();
+      })
+      .then(setAvailableUsers)
+      .catch((err) => {
+        console.error(err);
+        setAvailableUsers([]);
+      })
+      .finally(() => setLoadingUsers(false));
+  }, [showStartChatModal]);
+
+  // Scroll to bottom on messages update
+  const messagesEndRef = useRef(null);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Handle sending message with optional file
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!selectedConv || (!messageInput.trim() && !file)) return;
+
+    const formData = new FormData();
+    formData.append("content", messageInput.trim());
+    if (file) formData.append("file", file);
+
+    fetch(`${API_URL}/messages/conversations/${selectedConv.conversationId}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to send message");
+        return res.json();
+      })
+      .then((data) => {
+        setMessages((prev) => [...prev, data]);
+        setMessageInput("");
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = null;
+      })
+      .catch(console.error);
   };
+
+  // Start new conversation with selected user
+  const handleStartConversation = (user) => {
+    fetch(`${API_URL}/messages/conversations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ otherUserId: user.id }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to start conversation");
+        return res.json();
+      })
+      .then(({ conversationId }) => {
+        // Refresh conversations to include new one
+        return fetch(`${API_URL}/messages/conversations`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to refresh conversations");
+            return res.json();
+          })
+          .then((convs) => {
+            setConversations(convs);
+            const newConv = convs.find((c) => c.conversationId === conversationId);
+            setSelectedConv(newConv);
+            setShowStartChatModal(false);
+            setSearchUser("");
+            setAvailableUsers([]);
+          });
+      })
+      .catch(console.error);
+  };
+
+  // Filter available users by search term
+  const filteredAvailableUsers = availableUsers.filter((u) =>
+    u.fullname.toLowerCase().includes(searchUser.toLowerCase())
+  );
 
   return (
-    <div style={{ display: 'flex', height: '500px', border: '1px solid #ccc' }}>
-      <div
-        style={{
-          width: '250px',
-          borderRight: '1px solid #ccc',
-          overflowY: 'auto',
-        }}
-      >
-        <h3>Conversations</h3>
-        {conversations.length === 0 && <p>No conversations yet.</p>}
-        {conversations.map((conv) => (
-          <div
-            key={conv.conversationId}
-            onClick={() => selectConversation(conv)}
-            style={{
-              padding: '10px',
-              cursor: 'pointer',
-              backgroundColor:
-                selectedConv?.conversationId === conv.conversationId ? '#eee' : '#fff',
-            }}
-          >
-            <strong>{conv.participants}</strong>
-            <div style={{ fontSize: '12px', color: '#666' }}>{conv.lastMessage || 'No messages yet'}</div>
-          </div>
-        ))}
+    <div className="messaging-container">
+      <div className="conversations-panel">
+        <h2>Conversations</h2>
+        <button onClick={() => setShowStartChatModal(true)} className="start-chat-btn">
+          Start New Chat
+        </button>
+        {loadingConversations && <p>Loading conversations...</p>}
+        {!loadingConversations && conversations.length === 0 && <p>No conversations yet</p>}
+        <ul className="conversations-list">
+          {conversations.map((conv) => (
+            <li
+              key={conv.conversationId}
+              className={selectedConv?.conversationId === conv.conversationId ? "selected" : ""}
+              onClick={() => setSelectedConv(conv)}
+            >
+              <div>
+                <strong>{conv.participants}</strong>
+              </div>
+              <div className="last-message">{conv.lastMessage || <em>(No messages)</em>}</div>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3>Chat</h3>
-        <div
-          style={{
-            flex: 1,
-            padding: '10px',
-            overflowY: 'auto',
-            borderBottom: '1px solid #ccc',
-          }}
-        >
-          {selectedConv ? (
-            messages.length === 0 ? (
-              <p>No messages in this conversation yet.</p>
+      <div className="chat-panel">
+        {selectedConv ? (
+          <>
+            <h3>Chat with {selectedConv.participants}</h3>
+            {loadingMessages ? (
+              <p>Loading messages...</p>
             ) : (
-              messages.map((msg) => (
-                <div key={msg.id} style={{ marginBottom: '10px' }}>
-                  <strong>{msg.sender_name}</strong>{' '}
-                  <small>{new Date(msg.created_at).toLocaleString()}</small>
-                  <p>{msg.content}</p>
-                </div>
-              ))
-            )
-          ) : (
-            <p>Select a conversation to start chatting</p>
-          )}
-        </div>
-        {selectedConv && (
-          <div style={{ display: 'flex' }}>
-            <input
-              type="text"
-              value={newMsg}
-              onChange={(e) => setNewMsg(e.target.value)}
-              placeholder="Type your message..."
-              style={{ flex: 1, padding: '10px' }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') sendMessage();
-              }}
-            />
-            <button onClick={sendMessage} style={{ padding: '10px' }}>
-              Send
-            </button>
-          </div>
+              <div className="messages-list">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`message-item ${
+                      msg.sender_id === userId ? "outgoing" : "incoming"
+                    }`}
+                  >
+                    <div className="message-sender">{msg.sender_name}</div>
+                    <div className="message-content">
+                      {msg.content && <p>{msg.content}</p>}
+                      {msg.file_path && msg.file_type?.startsWith("image/") && (
+                        <img
+                          src={`${API_URL}${msg.file_path}`}
+                          alt={msg.file_name}
+                          className="message-image"
+                        />
+                      )}
+                      {msg.file_path && !msg.file_type?.startsWith("image/") && (
+                        <a href={`${API_URL}${msg.file_path}`} download>
+                          Download {msg.file_name}
+                        </a>
+                      )}
+                    </div>
+                    <div className="message-time">{new Date(msg.created_at).toLocaleString()}</div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+
+            <form className="message-form" onSubmit={handleSendMessage}>
+              <input
+                type="text"
+                placeholder="Type a message"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                disabled={!selectedConv}
+              />
+              <input
+                key={file ? file.name : "empty"}
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+              <button
+                type="submit"
+                disabled={!messageInput.trim() && !file}
+                className="send-button"
+              >
+                Send
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="no-chat-selected">Select a conversation to start chatting</div>
         )}
       </div>
+
+      {showStartChatModal && (
+        <div className="modal-backdrop" onClick={() => setShowStartChatModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Start New Chat</h3>
+            <input
+              type="text"
+              placeholder="Search users"
+              value={searchUser}
+              onChange={(e) => setSearchUser(e.target.value)}
+              autoFocus
+            />
+            <ul className="available-users-list">
+              {loadingUsers && <li>Loading users...</li>}
+              {!loadingUsers && availableUsers.length === 0 && (
+                <li>No users available to start a new chat</li>
+              )}
+              {!loadingUsers && availableUsers.length > 0 && filteredAvailableUsers.length === 0 && (
+                <li>No users found matching "{searchUser}"</li>
+              )}
+              {!loadingUsers &&
+                filteredAvailableUsers.map((user) => (
+                  <li key={user.id} onClick={() => handleStartConversation(user)}>
+                    {user.fullname}
+                  </li>
+                ))}
+            </ul>
+            <button onClick={() => setShowStartChatModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

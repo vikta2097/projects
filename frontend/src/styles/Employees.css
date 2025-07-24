@@ -1,12 +1,12 @@
-/* Employees.css (matching dashboard-home and sidebar) */
+/* Employees.css - updated for 'type' support and styling consistency */
 
 .employees-container {
   padding: 2rem;
   background-color: #f9f9f9;
   min-height: 100vh;
-  margin-left: 250px; /* leave space for sidebar */
+  margin-left: 250px; /* space for sidebar */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1f2937; /* matching dashboard text */
+  color: #1f2937;
 }
 
 .employees-container h2 {
@@ -22,7 +22,7 @@
   font-size: 1rem;
 }
 
-/* Employee Form Card - similar to .stat-card style */
+/* Form Card */
 .employee-form {
   background-color: #ffffff;
   padding: 1.5rem;
@@ -40,11 +40,11 @@
 .employee-form h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2563eb; /* same blue as stat-card h2 */
+  color: #2563eb;
   margin-bottom: 1rem;
 }
 
-/* Form groups */
+/* Form Groups */
 .form-group {
   margin-bottom: 1.25rem;
   display: flex;
@@ -61,7 +61,7 @@
 .employee-form select {
   padding: 10px 14px;
   font-size: 1rem;
-  border: 1.5px solid #d1d5db; /* light gray border */
+  border: 1.5px solid #d1d5db;
   border-radius: 8px;
   transition: border-color 0.2s ease-in-out;
   color: #1f2937;
@@ -97,12 +97,12 @@
 }
 
 .employee-form button[type="button"] {
-  background-color: #6b7280; /* gray-500 */
+  background-color: #6b7280;
   color: white;
 }
 
 .employee-form button[type="button"]:hover:not(:disabled) {
-  background-color: #4b5563; /* gray-700 */
+  background-color: #4b5563;
 }
 
 .employee-form button:disabled {
@@ -110,11 +110,40 @@
   opacity: 0.6;
 }
 
+/* Filter dropdown */
+.filter-group {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.filter-group label {
+  color: #1f2937;
+}
+
+.filter-group select {
+  padding: 8px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1f2937;
+  background-color: #fff;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.filter-group select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+}
+
 /* Employee Table */
 .employee-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 12px; /* space between rows */
+  border-spacing: 0 12px;
   background-color: transparent;
 }
 
@@ -150,7 +179,7 @@
   border: none;
 }
 
-/* Action buttons inside table */
+/* Table buttons */
 .employee-table button {
   background: none;
   border: none;
@@ -195,6 +224,25 @@
   background-color: #dcfce7;
 }
 
+/* Feedback messages */
+.success-message {
+  color: #16a34a;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #dc2626;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  font-style: italic;
+  color: #2563eb;
+  margin-bottom: 1rem;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .employees-container {
@@ -206,5 +254,11 @@
   .employee-table {
     max-width: 100%;
     overflow-x: auto;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }

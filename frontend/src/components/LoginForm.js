@@ -8,7 +8,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
- const BASE_URL = "http://localhost:3300";
+  const BASE_URL = "http://localhost:3300";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,7 +16,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
     setLoading(true);
 
     try {
-      // Login request
+      // Login request to correct backend route
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,6 +27,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
 
       if (!res.ok || !data.token) {
         setError(data?.message || "Login failed.");
+        setLoading(false);
         return;
       }
 
@@ -43,39 +44,29 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
 
       if (!profileRes.ok || !profileData.role) {
         setError("Failed to fetch user profile.");
+        setLoading(false);
         return;
       }
 
-      // Save user role
+      // Save role
       localStorage.setItem("role", profileData.role);
 
-      // Call parent function with token and role
+      // Save userId only if valid (not undefined/null/empty string)
+      if (
+        profileData.id !== undefined &&
+        profileData.id !== null &&
+        profileData.id !== ""
+      ) {
+        localStorage.setItem("userId", profileData.id);
+      } else {
+        console.warn("User ID missing or invalid. Not saving userId to localStorage.", profileData);
+      }
+
+      // Call parent success handler
       onLoginSuccess({
         token: data.token,
         role: profileData.role,
       });
-
-      // 🔒 Now check if admin
-      if (profileData.role === "admin") {
-        // Now safely fetch users
-        const usersRes = await fetch(`${BASE_URL}/api/users`, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${data.token}` },
-        });
-
-        if (!usersRes.ok) {
-          const errText = await usersRes.text();
-          setError(`Failed to fetch users: ${errText}`);
-          return;
-        }
-
-        const usersData = await usersRes.json();
-        console.log("Fetched users:", usersData);
-        // 👉 You can now pass usersData to your app state if needed
-      } else {
-        console.log("Not an admin. Skipping users fetch.");
-      }
-
     } catch (err) {
       console.error("Login error:", err);
       setError("Network error. Please try again.");
@@ -94,7 +85,10 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
       <div className="auth-form">
         {error && (
           <div className="error-message">
-            <span role="img" aria-label="Error">⚠️</span> {error}
+            <span role="img" aria-label="Error">
+              ⚠️
+            </span>{" "}
+            {error}
           </div>
         )}
 

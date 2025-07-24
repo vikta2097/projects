@@ -5,22 +5,26 @@ import NotificationComponent from "../pages/Notifications";
 export default function EmployeeDashboardHome() {
   const [leaveStatus, setLeaveStatus] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [stats, setStats] = useState({ pendingLeaves: 0, presentToday: 0 });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null); // current user state
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Helper: Extract user ID from JWT token payload
-  const getUserIdFromToken = (token) => {
+  // Decode token payload safely
+  const getUserFromToken = (token) => {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.userId || payload.id || payload.sub; // common fields
+      return {
+        id: payload.id || payload.userId || payload.sub,
+        email: payload.email || null,
+        role: payload.role || null,
+      };
     } catch (err) {
       console.error("Failed to parse token:", err);
       return null;
     }
   };
 
+  // Helper to check fetch response and parse JSON
   const checkResponse = async (response) => {
     try {
       const data = await response.json();
@@ -37,33 +41,51 @@ export default function EmployeeDashboardHome() {
     const fetchData = async () => {
       setLoading(true);
       setError("");
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No authentication token.");
+        setLoading(false);
+        return;
+      }
+
+      // Decode token to get minimal user info (id and email)
+      const userFromToken = getUserFromToken(token);
+      if (!userFromToken) {
+        setError("Invalid authentication token.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("No authentication token.");
-          setLoading(false);
-          return;
-        }
+        // Fetch full profile info from backend
+        const profileRes = await fetch("http://localhost:3300/api/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const profileData = await checkResponse(profileRes);
+        setCurrentUser({
+          ...userFromToken,
+          fullname: profileData.fullname,
+          department: profileData.department,
+          job_title: profileData.job_title,
+          // add more fields here if needed
+        });
 
-        // Option 2: Extract user info directly from token (no backend call)
-        const userId = getUserIdFromToken(token);
-        if (!userId) throw new Error("Invalid token: user ID missing");
-        setCurrentUser({ id: userId });
-
-        // Fetch user-specific leaves and attendance using token
+        // Fetch user-specific leaves and attendance in parallel
         const [leavesRes, attendanceRes] = await Promise.all([
-          fetch("http://localhost:3300/api/leaves/mine", {
+          fetch("http://localhost:3300/api/leaves/my", {
             headers: { Authorization: `Bearer ${token}` },
           }),
           fetch("http://localhost:3300/api/attendance/mine/recent", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
+
         const leavesData = await checkResponse(leavesRes);
         const attendanceData = await checkResponse(attendanceRes);
+
         setLeaveStatus(leavesData);
         setAttendance(attendanceData);
-
       } catch (err) {
         setError(err.message);
       } finally {
@@ -79,7 +101,7 @@ export default function EmployeeDashboardHome() {
 
   return (
     <div>
-      {/* Notification bell and welcome message */}
+      {/* Header with Welcome message and Notifications */}
       <div
         style={{
           display: "flex",
@@ -90,16 +112,18 @@ export default function EmployeeDashboardHome() {
         }}
       >
         <div>
-          {currentUser && (
+          {currentUser ? (
             <span>
-              Welcome, {currentUser.fullname || currentUser.email || ` ${currentUser.fullname}`}
+              Welcome, {currentUser.fullname || currentUser.email || "User"}
             </span>
+          ) : (
+            <span>Welcome, User</span>
           )}
         </div>
         <div>{currentUser && <NotificationComponent userId={currentUser.id} />}</div>
       </div>
 
-      {/* Existing dashboard content */}
+      {/* Main Dashboard Content */}
       <div className="employee-dashboard-home">
         <h1>Employee Dashboard</h1>
 
@@ -111,8 +135,8 @@ export default function EmployeeDashboardHome() {
             <ul className="leave-list">
               {leaveStatus.map((leave) => (
                 <li key={leave.id}>
-                  <strong>{leave.leave_type}</strong>: {leave.start_date} to {leave.end_date} —{" "}
-                  <em>{leave.status}</em>
+                  <strong>{leave.leave_type}</strong>: {leave.start_date} to{" "}
+                  {leave.end_date} — <em>{leave.status}</em>
                 </li>
               ))}
             </ul>
@@ -152,20 +176,20 @@ export default function EmployeeDashboardHome() {
             <p>No recent attendance records found</p>
           )}
         </section>
+
         <section className="overall-stats">
           <h2>My Stats</h2>
           <div className="stats-cards">
             <div className="stat-card">
-              <h3>{leaveStatus.filter(leave => leave.status === "pending").length}</h3>
+              <h3>{leaveStatus.filter((leave) => leave.status === "pending").length}</h3>
               <p>My Pending Leaves</p>
             </div>
             <div className="stat-card">
-              <h3>{attendance.filter(att => att.status === "Present").length}</h3>
+              <h3>{attendance.filter((att) => att.status === "Present").length}</h3>
               <p>Days Present</p>
             </div>
           </div>
         </section>
-
       </div>
     </div>
   );

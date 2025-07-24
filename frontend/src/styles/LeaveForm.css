@@ -1,83 +1,116 @@
 .leave-form {
-  background: #2ba81f;
+  background:  #155724;
   color: #fff;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 25px;
+  border-radius: 12px;
   max-width: 600px;
-  max-height: 800px;
-  margin: 0 auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  font-family: Arial, sans-serif;
+  margin: 40px auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .leave-form h2 {
   color: #ffcc80;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   text-align: center;
+  font-size: 1.8rem;
 }
 
 .leave-form label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   font-weight: 600;
   color: #ffe0a3;
+  font-size: 0.95rem;
 }
 
 .leave-form input[type="text"],
 .leave-form input[type="date"],
 .leave-form textarea {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: none;
-  border-radius: 5px;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #14500e;
+  border-radius: 6px;
   background: #020b92;
   color: #fff;
   font-size: 1rem;
   box-sizing: border-box;
+  transition: border 0.2s ease-in-out;
+}
+
+.leave-form input[type="text"]:focus,
+.leave-form input[type="date"]:focus,
+.leave-form textarea:focus {
+  border: 1px solid #ffcc80;
+  outline: none;
+  background: #0d1fc4;
 }
 
 .leave-form input::placeholder,
 .leave-form textarea::placeholder {
-  color: #aaa;
+  color: #ccc;
+  opacity: 0.8;
 }
 
 .leave-form textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
 .leave-form button {
   background: #ffcc80;
   color: #103291;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 30px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.1s ease;
   display: block;
   margin: 0 auto;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
 }
 
 .leave-form button:hover,
 .leave-form button:focus {
   background: #ffc04d;
+  transform: translateY(-1px);
   outline: none;
 }
 
 .leave-form .error-message {
-  color: #ff5252;
-  background: #fff1f1;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
+  color: #ff4d4f;
+  background: #ffecec;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 18px;
   font-weight: 600;
   text-align: center;
+  border-left: 5px solid #ff4d4f;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
+}
+
+.leave-balances {
+  background: #103291;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  color: #fff9db;
+}
+
+.leave-balances h4 {
+  margin-bottom: 8px;
+}
+
+.leave-balances ul {
+  padding-left: 20px;
+}
+
+.leave-balances li {
+  margin-bottom: 4px;
 }

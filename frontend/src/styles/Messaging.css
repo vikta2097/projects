@@ -1,0 +1,117 @@
+.messaging-container {
+  display: flex;
+  height: 100%;
+}
+
+.conversations-panel {
+  width: 250px;
+  border-right: 1px solid #ddd;
+  background: #fff;
+  padding: 10px;
+}
+
+.start-chat-btn {
+  width: 100%;
+  padding: 8px 0;
+  margin-bottom: 10px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.conversation-item {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  transition: background 0.2s;
+}
+
+.conversation-item:hover,
+.conversation-item.active {
+  background: #e6f0ff;
+}
+
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  padding: 10px;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.message-item {
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.message-image {
+  max-width: 200px;
+  display: block;
+  margin-top: 5px;
+}
+
+.message-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.message-input input[type="text"] {
+  flex: 1;
+  padding: 8px;
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.no-selection {
+  color: #666;
+  text-align: center;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  width: 320px;
+  border-radius: 8px;
+}
+
+.user-search-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.user-search-list li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.user-search-list li:hover {
+  background: #f0f0f0;
+}

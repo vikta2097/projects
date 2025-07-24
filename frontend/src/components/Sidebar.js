@@ -20,14 +20,34 @@ const Sidebar = ({ onLogoutClick, role }) => {
         </NavLink>
 
         {isAdmin && (
-          <NavLink
-            to="/employees"
-            className={({ isActive }) =>
-              isActive ? "sidebar-link active" : "sidebar-link"
-            }
-          >
-            Employees
-          </NavLink>
+          <>
+            <NavLink
+              to="/employees"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Employees
+            </NavLink>
+
+            <NavLink
+              to="/payroll"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Payroll
+            </NavLink>
+
+            <NavLink
+              to="/users"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Users
+            </NavLink>
+          </>
         )}
 
         <NavLink
@@ -48,28 +68,14 @@ const Sidebar = ({ onLogoutClick, role }) => {
           Leave
         </NavLink>
 
-      
-
-        {/* Messaging link */}
         <NavLink
-          to="/messaging"
+          to="/messages"
           className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"
           }
         >
           Messaging
         </NavLink>
-
-        {isAdmin && (
-          <NavLink
-            to="/users"
-            className={({ isActive }) =>
-              isActive ? "sidebar-link active" : "sidebar-link"
-            }
-          >
-            Users
-          </NavLink>
-        )}
 
         <button onClick={onLogoutClick} className="logout-btn">
           Logout

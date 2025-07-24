@@ -64,15 +64,7 @@
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 1rem;
 }
-.notification-bell {
-  position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.5rem;
-  color: #4b5563;
-  transition: color 0.3s ease;
-}
+
 
 .notification-bell:hover {
   color: #2563eb;
