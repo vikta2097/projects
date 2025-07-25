@@ -16,7 +16,7 @@ function isValidPassword(password) {
   return /^(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{6,}$/.test(password);
 }
 
-// ✅ REGISTER
+// REGISTER
 router.post('/register', async (req, res) => {
   const { email, password, fullname, role } = req.body;
 
@@ -27,8 +27,8 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ message: 'Invalid email format' });
   }
   if (!isValidPassword(password)) {
-    return res.status(400).json({ 
-      message: 'Password must be at least 6 characters with a number, a special character, and a lowercase letter'
+    return res.status(400).json({
+      message: 'Password must be at least 6 characters with a number, a special character, and a lowercase letter',
     });
   }
 
@@ -41,7 +41,7 @@ router.post('/register', async (req, res) => {
 
       const hashed = await bcrypt.hash(password, 10);
       db.query(
-        'INSERT INTO usercredentials (email, password_hash, fullname, role) VALUES (?, ?, ?, ?)', 
+        'INSERT INTO usercredentials (email, password_hash, fullname, role) VALUES (?, ?, ?, ?)',
         [email, hashed, fullname, userRole],
         (err) => {
           if (err) return res.status(500).json({ message: 'Registration failed' });
@@ -54,12 +54,11 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ✅ LOGIN
+// LOGIN
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) 
-    return res.status(400).json({ message: 'Email and password are required' });
+  if (!email || !password) return res.status(400).json({ message: 'Email and password are required' });
 
   db.query('SELECT * FROM usercredentials WHERE email = ?', [email], (err, results) => {
     if (err) return res.status(500).json({ message: 'Database error' });
@@ -84,7 +83,7 @@ router.post('/login', (req, res) => {
   });
 });
 
-// ✅ Forgot Password
+// Forgot Password
 router.post('/forgot-password', (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email is required' });
@@ -95,7 +94,7 @@ router.post('/forgot-password', (req, res) => {
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-    const transporter = nodemailer.createTransport({ 
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
@@ -119,14 +118,14 @@ router.post('/forgot-password', (req, res) => {
   });
 });
 
-// ✅ Reset Password
+// Reset Password
 router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
   if (!password || !isValidPassword(password)) {
-    return res.status(400).json({ 
-      message: 'Password must be at least 6 characters and include a lowercase letter, a number, and a special character' 
+    return res.status(400).json({
+      message: 'Password must be at least 6 characters and include a lowercase letter, a number, and a special character',
     });
   }
 
@@ -143,10 +142,26 @@ router.post('/reset-password/:token', async (req, res) => {
   }
 });
 
-// ✅ Get Current User
+// Get Current User + Employee Status
 router.get('/me', verifyToken, (req, res) => {
   const { id, email, role, fullname } = req.user;
-  res.json({ id, email, role, fullname });
+
+  // Check if user has an employee record
+  db.query('SELECT id FROM employees WHERE user_id = ?', [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    const isEmployee = results.length > 0;
+
+    res.json({
+      id,
+      email,
+      role,
+      fullname,
+      isEmployee,
+    });
+  });
 });
 
 module.exports = router;

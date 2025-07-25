@@ -47,7 +47,7 @@ export default function DualDashboardView({ token, onLogout }) {
       </div>
 
       {/* Dashboard Layout */}
-      <div style={{ flex: 1, display: "flex" }}>
+      <div style={{ flex: 0, display: "flex" }}>
         {/* Sidebar only for Admin view */}
         {activeView === "admin" && (
           <Sidebar

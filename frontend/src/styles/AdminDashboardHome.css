@@ -80,3 +80,16 @@
     flex-direction: column;
   }
 }
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  height: 100vh;
+  padding-bottom: 2rem; /* Prevent overlap with fixed footer/taskbar if present */
+   scroll-behavior: smooth;
+}

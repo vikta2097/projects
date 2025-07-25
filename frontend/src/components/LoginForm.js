@@ -16,7 +16,7 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
     setLoading(true);
 
     try {
-      // Login request to correct backend route
+      // Login request
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,38 +34,28 @@ const LoginForm = ({ onSignupClick, onForgotClick, onLoginSuccess }) => {
       // Save token
       localStorage.setItem("token", data.token);
 
-      // Fetch user profile
-      const profileRes = await fetch(`${BASE_URL}/api/profile`, {
+      // Fetch user profile including isEmployee flag
+      const profileRes = await fetch(`${BASE_URL}/api/auth/me`, {
         method: "GET",
         headers: { Authorization: `Bearer ${data.token}` },
       });
 
       const profileData = await profileRes.json();
 
-      if (!profileRes.ok || !profileData.role) {
-        setError("Failed to fetch user profile.");
+      if (!profileRes.ok) {
+        setError(profileData?.message || "Failed to fetch user profile.");
         setLoading(false);
         return;
       }
 
-      // Save role
+      // Save role and userId if present
       localStorage.setItem("role", profileData.role);
+      if (profileData.id) localStorage.setItem("userId", profileData.id);
 
-      // Save userId only if valid (not undefined/null/empty string)
-      if (
-        profileData.id !== undefined &&
-        profileData.id !== null &&
-        profileData.id !== ""
-      ) {
-        localStorage.setItem("userId", profileData.id);
-      } else {
-        console.warn("User ID missing or invalid. Not saving userId to localStorage.", profileData);
-      }
-
-      // Call parent success handler
+      // Pass entire profile including isEmployee to parent
       onLoginSuccess({
         token: data.token,
-        role: profileData.role,
+        ...profileData, // includes id, email, role, fullname, isEmployee
       });
     } catch (err) {
       console.error("Login error:", err);

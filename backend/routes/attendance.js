@@ -146,7 +146,7 @@ router.delete('/:id', verifyToken, (req, res) => {
 
 // ----- EMPLOYEE ROUTES -----
 
-// Check if employee marked attendance for a given date
+// Check if employee marked attendance for a given date (extended with locations, worked hours)
 router.get('/mine', verifyToken, (req, res) => {
   const userId = req.user.id;
   const date = req.query.date;
@@ -157,12 +157,20 @@ router.get('/mine', verifyToken, (req, res) => {
     const employee_id = results[0].id;
 
     db.query(
-      'SELECT check_in FROM attendance WHERE employee_id = ? AND date = ?',
+      `SELECT check_in, check_out, worked_hours, check_in_location, check_out_location
+       FROM attendance WHERE employee_id = ? AND date = ?`,
       [employee_id, date],
       (err, rows) => {
         if (err) return res.status(500).json({ message: 'Error checking attendance' });
         if (rows.length > 0) {
-          res.json({ marked: true, check_in: rows[0].check_in });
+          res.json({
+            marked: true,
+            check_in: rows[0].check_in,
+            check_out: rows[0].check_out,
+            worked_hours: rows[0].worked_hours,
+            check_in_location: rows[0].check_in_location,
+            check_out_location: rows[0].check_out_location,
+          });
         } else {
           res.json({ marked: false });
         }
@@ -237,7 +245,7 @@ router.post('/mine', verifyToken, (req, res) => {
   });
 });
 
-// Employee checks out
+// Employee checks out (with double checkout prevention)
 router.post('/mine/checkout', verifyToken, (req, res) => {
   const userId = req.user.id;
   const { check_out_location } = req.body;
@@ -250,37 +258,43 @@ router.post('/mine/checkout', verifyToken, (req, res) => {
 
     const employee_id = results[0].id;
 
-    const updateSql = `
-      UPDATE attendance
-      SET check_out = ?, 
-          check_out_location = ?, 
-          worked_hours = TIMESTAMPDIFF(
-            MINUTE,
-            STR_TO_DATE(CONCAT(date, ' ', check_in), '%Y-%m-%d %H:%i:%s'),
-            STR_TO_DATE(CONCAT(date, ' ', ?), '%Y-%m-%d %H:%i:%s')
-          ) / 60
-      WHERE employee_id = ? AND date = ?
-    `;
+    // Check if already checked out
+    db.query('SELECT check_out FROM attendance WHERE employee_id = ? AND date = ?', [employee_id, formattedDate], (err, rows) => {
+      if (err) return res.status(500).json({ message: 'Error checking attendance' });
+      if (rows.length === 0) return res.status(400).json({ message: 'Attendance not marked for today' });
+      if (rows[0].check_out) return res.status(400).json({ message: 'Already checked out today' });
 
-    db.query(updateSql, [checkOut, check_out_location, checkOut, employee_id, formattedDate], async (err, result) => {
-      if (err) {
-        console.error('Checkout error:', err);  // Add error logging for debugging
-        return res.status(500).json({ message: 'Failed to check out' });
-      }
+      const updateSql = `
+        UPDATE attendance
+        SET check_out = ?, 
+            check_out_location = ?, 
+            worked_hours = TIMESTAMPDIFF(
+              MINUTE,
+              STR_TO_DATE(CONCAT(date, ' ', check_in), '%Y-%m-%d %H:%i:%s'),
+              STR_TO_DATE(CONCAT(date, ' ', ?), '%Y-%m-%d %H:%i:%s')
+            ) / 60
+        WHERE employee_id = ? AND date = ?
+      `;
 
-      await sendNotificationDirect({
-        userId,
-        title: 'Checked Out',
-        message: `You checked out at ${checkOut} on ${formattedDate}.`,
-        type: NOTIFICATION_TYPES.INFO,
-        priority: PRIORITY_LEVELS.MEDIUM,
+      db.query(updateSql, [checkOut, check_out_location, checkOut, employee_id, formattedDate], async (err, result) => {
+        if (err) {
+          console.error('Checkout error:', err);
+          return res.status(500).json({ message: 'Failed to check out' });
+        }
+
+        await sendNotificationDirect({
+          userId,
+          title: 'Checked Out',
+          message: `You checked out at ${checkOut} on ${formattedDate}.`,
+          type: NOTIFICATION_TYPES.INFO,
+          priority: PRIORITY_LEVELS.MEDIUM,
+        });
+
+        res.json({ message: 'Check-out successful' });
       });
-
-      res.json({ message: 'Check-out successful' });
     });
   });
 });
-
 
 // Get recent attendance for logged-in employee
 router.get('/mine/recent', verifyToken, (req, res) => {
@@ -295,7 +309,7 @@ router.get('/mine/recent', verifyToken, (req, res) => {
   });
 });
 
-// Get today's attendance
+// Get today's attendance (admin)
 router.get('/today', verifyToken, (req, res) => {
   const today = new Date().toISOString().split('T')[0];
   db.query('SELECT * FROM attendance WHERE date = ?', [today], (err, results) => {

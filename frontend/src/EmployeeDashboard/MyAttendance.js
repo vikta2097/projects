@@ -23,10 +23,27 @@ function MyAttendance() {
   const fetchUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        position => {
-          const locationStr = `${position.coords.latitude}, ${position.coords.longitude}`;
-          setCheckInLocation(locationStr);
-          setCheckOutLocation(locationStr);
+        async position => {
+          const { latitude, longitude } = position.coords;
+
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+            );
+            const data = await response.json();
+
+            const placeName = data.address?.city
+              ? `${data.address.city}, ${data.address.country}`
+              : data.display_name || `${latitude}, ${longitude}`;
+
+            setCheckInLocation(placeName);
+            setCheckOutLocation(placeName);
+          } catch (error) {
+            console.error('Geocoding failed:', error);
+            const fallback = `${latitude}, ${longitude}`;
+            setCheckInLocation(fallback);
+            setCheckOutLocation(fallback);
+          }
         },
         () => {
           setCheckInLocation('Location unavailable');
@@ -82,16 +99,22 @@ function MyAttendance() {
           setAlreadyMarked(true);
           setAttendanceData(data);
           setCheckedOut(!!data.check_out);
+          const checkInTime = formatTime(data.check_in);
+          const checkOutTime = data.check_out ? formatTime(data.check_out) : '';
           setStatusMessage(
-            `✅ You checked in at ${data.check_in}${
-              data.check_out ? ` and out at ${data.check_out}` : ''
-            }.`
+            `✅ You checked in at ${checkInTime}${checkOutTime ? ` and out at ${checkOutTime}` : ''}.`
           );
         }
       }
     } catch (err) {
       console.error('Error checking today attendance:', err);
     }
+  };
+
+  const formatTime = timeString => {
+    if (!timeString) return '';
+    const date = new Date(`1970-01-01T${timeString}Z`);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const handleCheckIn = async () => {
@@ -111,7 +134,7 @@ function MyAttendance() {
       if (res.ok) {
         setStatusMessage('✅ Attendance marked successfully.');
         setAlreadyMarked(true);
-        checkIfMarkedToday(); // Refresh attendance data
+        checkIfMarkedToday();
       } else {
         setStatusMessage(`❌ ${data.message}`);
       }
@@ -123,6 +146,11 @@ function MyAttendance() {
   };
 
   const handleCheckOut = async () => {
+    if (checkedOut) {
+      setStatusMessage('⚠️ You have already checked out today.');
+      return;
+    }
+
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -139,7 +167,7 @@ function MyAttendance() {
       if (res.ok) {
         setStatusMessage('✅ Checked out successfully.');
         setCheckedOut(true);
-        checkIfMarkedToday(); // Refresh attendance data
+        checkIfMarkedToday();
       } else {
         setStatusMessage(`❌ ${data.message}`);
       }
@@ -151,31 +179,62 @@ function MyAttendance() {
   };
 
   return (
-    <div className="my-attendance-container">
+    <div className="attendance-card">
       <h2>🕘 My Attendance</h2>
 
       {onLeave ? (
-        <div className="status-message leave">{statusMessage}</div>
-      ) : alreadyMarked ? (
-        <div>
-          <div className="status-message success">{statusMessage}</div>
-          {attendanceData?.worked_hours && (
-            <p className="worked-hours">
-              🕒 Worked Hours: {Number(attendanceData.worked_hours).toFixed(2)}
-            </p>
+        <div className="status-message error">{statusMessage}</div>
+      ) : (
+        <>
+          {statusMessage && (
+            <div className={`status-message ${checkedOut ? 'success' : alreadyMarked ? 'success' : 'error'}`}>
+              {statusMessage}
+            </div>
           )}
-          {!checkedOut && (
+
+          <div className="attendance-info">
+            {alreadyMarked && (
+              <>
+                {attendanceData?.check_in && (
+                  <p>
+                    📍 <strong>Check-in Location:</strong> {attendanceData.check_in_location || checkInLocation}
+                  </p>
+                )}
+                {attendanceData?.check_out && (
+                  <p>
+                    📍 <strong>Check-out Location:</strong> {attendanceData.check_out_location || checkOutLocation}
+                  </p>
+                )}
+                {attendanceData?.worked_hours && (
+                  <p className="worked-hours">
+                    🕒 Worked Hours: {Number(attendanceData.worked_hours).toFixed(2)}
+                  </p>
+                )}
+              </>
+            )}
+
+            {!alreadyMarked && (
+              <p>
+                📍 <strong>Current Check-in Location:</strong> {checkInLocation || 'Fetching...'}
+              </p>
+            )}
+
+            {!checkedOut && alreadyMarked && (
+              <p>
+                📍 <strong>Current Check-out Location:</strong> {checkOutLocation || 'Fetching...'}
+              </p>
+            )}
+          </div>
+
+          {!alreadyMarked ? (
+            <button className="attendance-button" onClick={handleCheckIn} disabled={loading}>
+              {loading ? 'Marking...' : 'Check In'}
+            </button>
+          ) : !checkedOut ? (
             <button className="attendance-button" onClick={handleCheckOut} disabled={loading}>
               {loading ? 'Checking out...' : 'Check Out'}
             </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <button className="attendance-button" onClick={handleCheckIn} disabled={loading}>
-            {loading ? 'Marking...' : 'Check In'}
-          </button>
-          {statusMessage && <div className="status-message error">{statusMessage}</div>}
+          ) : null}
         </>
       )}
     </div>

@@ -4,9 +4,10 @@
   padding: 2rem;
   background-color: #f9f9f9;
   min-height: 100vh;
-  margin-left: 250px; /* Space for sidebar */
+  margin-left: 50px; /* Space for sidebar */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #1f2937;
+   scroll-behavior: smooth;
 }
 
 .attendance-container h2 {

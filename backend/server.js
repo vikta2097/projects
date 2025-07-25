@@ -24,6 +24,11 @@ const leavesRoutes = require('./routes/leaves');
 const profileRoutes = require('./routes/profile');
 const employeesRoutes = require('./routes/employees');
 const payrollRoutes = require('./routes/payrollRoutes');
+const analyticsRoutes = require('./routes/analytics');
+
+
+
+
 
 // Notification & Messaging Imports
 const { router: notificationRoutes, initNotifications } = require('./routes/notifications');
@@ -44,6 +49,7 @@ app.use('/api/employees', employeesRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messaging.router);
 app.use('/api/payroll', payrollRoutes); // ✅ Can now be safely used
+app.use('/api/analytics', analyticsRoutes);
 
 // Token validation route
 app.get('/api/validate-token', verifyToken, (req, res) => {

@@ -77,6 +77,15 @@ const Sidebar = ({ onLogoutClick, role }) => {
           Messaging
         </NavLink>
 
+        <NavLink
+  to="/analytics"
+  className={({ isActive }) =>
+    isActive ? "sidebar-link active" : "sidebar-link"
+  }
+>
+  AI Insights
+</NavLink>
+
         <button onClick={onLogoutClick} className="logout-btn">
           Logout
         </button>

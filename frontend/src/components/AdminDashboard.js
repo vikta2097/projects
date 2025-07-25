@@ -9,6 +9,7 @@ import LeaveManagement from "../pages/LeaveManagement";
 import Notifications from "../pages/Notifications";
 import Messaging from "../EmployeeDashboard/messaging";
 import AdminPayroll from "../pages/AdminPayroll"; // <-- ✅ ADD THIS IMPORT
+import AnalyticsInsights from "../pages/AnalyticsInsights"; // Import the new Analytics Insights page
 
 import "../styles/AdminDashboardHome.css";
 
@@ -46,6 +47,7 @@ export default function AdminDashboard({ onLogout, role }) {
 
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" />} />
+           <Route path="/analytics" element={<AnalyticsInsights />} />
         </Routes>
       </div>
     </div>
