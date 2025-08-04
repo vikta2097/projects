@@ -33,7 +33,7 @@ const ResetPasswordForm = ({ token, onLoginClick }) => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3306/api/reset-password", {
+      const res = await fetch("http://localhost:3300/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: password }),

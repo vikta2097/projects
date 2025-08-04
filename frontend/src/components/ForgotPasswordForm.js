@@ -12,9 +12,8 @@ const ForgotPasswordForm = ({ onLoginClick }) => {
     setError("");
     setMessage("");
     setLoading(true);
-    
     try {
-      const res = await fetch("http://localhost:3306/api/forgot-password", {
+      const res = await fetch("http://localhost:3300/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

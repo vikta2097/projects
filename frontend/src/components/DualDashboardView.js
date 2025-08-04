@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import AdminDashboard from "./AdminDashboard";
 import UserDashboard from "../EmployeeDashboard/UserDashboard";
-import Sidebar from "../components/Sidebar"; // Ensure you have a Sidebar component
-//import "../styles/DualDashboard.css"; // optional for layout styling
 
 export default function DualDashboardView({ token, onLogout }) {
   const [activeView, setActiveView] = useState("admin"); // 'admin' or 'employee'
 
-  // Button styles for toggler
   const buttonStyle = (active) => ({
     padding: "6px 12px",
     cursor: active ? "default" : "pointer",
@@ -19,7 +16,6 @@ export default function DualDashboardView({ token, onLogout }) {
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Dashboard switch toggle */}
       <div
         style={{
           padding: "10px",
@@ -46,24 +42,12 @@ export default function DualDashboardView({ token, onLogout }) {
         </button>
       </div>
 
-      {/* Dashboard Layout */}
-      <div style={{ flex: 0, display: "flex" }}>
-        {/* Sidebar only for Admin view */}
-        {activeView === "admin" && (
-          <Sidebar
-            role="admin"
-            onLogout={onLogout}
-          />
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {activeView === "admin" ? (
+          <AdminDashboard token={token} role="admin" onLogout={onLogout} />
+        ) : (
+          <UserDashboard token={token} role="employee" onLogout={onLogout} />
         )}
-
-        {/* Main content */}
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {activeView === "admin" ? (
-            <AdminDashboard token={token} role="admin" />
-          ) : (
-            <UserDashboard token={token} role="employee" />
-          )}
-        </div>
       </div>
     </div>
   );
